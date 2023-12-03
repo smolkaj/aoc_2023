@@ -1,0 +1,6 @@
+(executable
+ (public_name aoc_2023)
+ (name main)
+ (libraries aoc_2023 base)
+ (preprocess
+  (pps ppx_jane ppx_inline_test ppx_expect ppx_assert)))
