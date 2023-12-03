@@ -94,7 +94,8 @@ let process (schematic : string) =
             | None, None -> None
         )
         |> function
-        | None -> () | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+        | None -> ()
+        | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
     );
     !sum
 
@@ -1514,12 +1515,16 @@ let process (schematic : string) =
           | None, None -> None
       )
       |> function
-      | None -> () | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+      | None -> ()
+      | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
   );
   let sum = ref 0 in
   gear_nums
   |> Array.iter ~f:(fun row ->
-         Array.iter row ~f:(function [x; y] -> sum := !sum + (x * y) | _ -> ())
+         Array.iter row ~f:(function
+           | [x; y] -> sum := !sum + (x * y)
+           | _ -> ()
+           )
      );
   !sum
 

@@ -42,10 +42,10 @@ type game = {id : int; hands : hand list} [@@deriving sexp_of]
 let empty_hand : hand = fun _ -> 0
 
 let parse_color_exn = function
-  | "red" -> Red
-  | "green" -> Green
-  | "blue" -> Blue
-  | s -> failwith (Printf.sprintf "invalid color: \"%s\"" s)
+| "red" -> Red
+| "green" -> Green
+| "blue" -> Blue
+| s -> failwith (Printf.sprintf "invalid color: \"%s\"" s)
 
 let parse_game_header_exn (header : string) : int =
   header
@@ -56,12 +56,17 @@ let parse_game_header_exn (header : string) : int =
 
 let merge_disjoint_hands_exn (h1 : hand) (h2 : hand) =
   let merge_disjoint n m =
-    match n, m with x, 0 | 0, x -> x | _ -> failwith "not disjoint"
+    match n, m with
+    | x, 0 | 0, x -> x
+    | _ -> failwith "not disjoint"
   in
   let red = merge_disjoint (h1 Red) (h2 Red) in
   let green = merge_disjoint (h1 Green) (h2 Green) in
   let blue = merge_disjoint (h1 Blue) (h2 Blue) in
-  function Red -> red | Green -> green | Blue -> blue
+  function
+  | Red -> red
+  | Green -> green
+  | Blue -> blue
 
 let parse_hand_subset_exn (subset : string) : hand =
   subset
@@ -129,7 +134,10 @@ let is_legal_game (game : game) ~(max_hand : hand) : bool =
       && hand Blue <= max_hand Blue
   )
 
-let example_max_hand = function Red -> 12 | Green -> 13 | Blue -> 14
+let example_max_hand = function
+| Red -> 12
+| Green -> 13
+| Blue -> 14
 
 let%test _ =
   {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green|}
