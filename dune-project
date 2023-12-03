@@ -5,13 +5,13 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github smolkaj/aoe_2023))
 
-(authors "Author Name")
+(authors "Steffen Smolka")
 
-(maintainers "Maintainer Name")
+(maintainers "Steffen Smolka")
 
-(license LICENSE)
+(license MIT)
 
 (documentation https://url/to/documentation)
 
