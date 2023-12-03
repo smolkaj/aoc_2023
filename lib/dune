@@ -1,6 +1,0 @@
-(library
- (inline_tests)
- (name aoc_2023)
- (libraries base)
- (preprocess
-  (pps ppx_jane ppx_inline_test ppx_expect ppx_assert)))

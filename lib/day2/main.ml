@@ -92,10 +92,22 @@ let parse_game_exn (game_record : string) : game =
 let parse_games_record (games_record : string) : game list =
   games_record |> String.split_lines |> List.map ~f:parse_game_exn
 
-let test_parse_games_record () =
+let%expect_test _ =
   example_record |> parse_games_record |> [%sexp_of: game list]
-  |> Sexp.to_string_hum |> printf "%s\n"
-
-let () =
-  printf "\n------------------------------------------\n%s\n" example_record;
-  test_parse_games_record ()
+  |> Sexp.to_string_hum |> print_endline;
+  [%expect {|
+    ((Game (id 1)
+      (hands (((Red 4) (Blue 3)) ((Red 1) (Green 2) (Blue 6)) ((Green 2)))))
+     (Game (id 2)
+      (hands
+       (((Green 2) (Blue 1)) ((Red 1) (Green 3) (Blue 4)) ((Green 1) (Blue 1)))))
+     (Game (id 3)
+      (hands
+       (((Red 20) (Green 8) (Blue 6)) ((Red 4) (Green 13) (Blue 5))
+        ((Red 1) (Green 5)))))
+     (Game (id 4)
+      (hands
+       (((Red 3) (Green 1) (Blue 6)) ((Red 6) (Green 3))
+        ((Red 14) (Green 3) (Blue 15)))))
+     (Game (id 5)
+      (hands (((Red 6) (Green 3) (Blue 1)) ((Red 1) (Green 2) (Blue 2)))))) |}]

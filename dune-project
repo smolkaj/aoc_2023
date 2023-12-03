@@ -2,7 +2,7 @@
 
 (name aoc_2023)
 
-(generate_opam_files true)
+(generate_opam_files false)
 
 (source
  (github smolkaj/aoe_2023))

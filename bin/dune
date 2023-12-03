@@ -1,5 +1,0 @@
-(executable
- (name day2)
- (libraries base stdio)
- (preprocess
-  (pps ppx_jane ppx_inline_test ppx_expect ppx_assert)))
