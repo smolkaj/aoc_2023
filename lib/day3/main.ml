@@ -1494,12 +1494,14 @@ let process (schematic : string) =
   let lines = schematic |> String.split_lines |> Array.of_list in
   let n = Array.length lines in
   let m = String.length lines.(0) in
-  let gear_nums = Array.init n ~f:(fun _ -> Array.init m ~f:(fun _ -> [])) in
+  let gear_nums_mat =
+    Array.init n ~f:(fun _ -> Array.init m ~f:(fun _ -> []))
+  in
   let add_num value ~min_x ~max_x ~y : unit =
     for i = Int.max 0 (y - 1) to Int.min (n - 1) (y + 1) do
       for j = Int.max 0 (min_x - 1) to Int.min (m - 1) (max_x + 1) do
         if String.get lines.(i) j |> Char.equal '*' then
-          gear_nums.(i).(j) <- value :: gear_nums.(i).(j)
+          gear_nums_mat.(i).(j) <- value :: gear_nums_mat.(i).(j)
       done
     done
   in
@@ -1518,15 +1520,13 @@ let process (schematic : string) =
       | None -> ()
       | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
   );
-  let sum = ref 0 in
-  gear_nums
-  |> Array.iter ~f:(fun row ->
-         Array.iter row ~f:(function
-           | [x; y] -> sum := !sum + (x * y)
-           | _ -> ()
-           )
-     );
-  !sum
+  Array.fold gear_nums_mat ~init:0 ~f:(fun init gear_nums_row ->
+      Array.fold gear_nums_row ~init ~f:(fun init gear_nums ->
+          match gear_nums with
+          | [x; y] -> init + (x * y)
+          | _ -> init
+      )
+  )
 
 let%expect_test _ =
   example_engine_schematic |> process |> printf "%d\n";
