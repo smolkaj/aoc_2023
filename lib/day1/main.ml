@@ -28,14 +28,18 @@ Consider your entire calibration document. What is the sum of all of the calibra
 
 let recover_value (line : string) : int =
   let digits =
-    line |> String.to_list |> List.map ~f:String.of_char
+    line
+    |> String.to_list
+    |> List.map ~f:String.of_char
     |> List.filter_map ~f:Int.of_string_opt
   in
-  let x, y = (List.hd_exn digits, List.last_exn digits) in
+  let x, y = List.hd_exn digits, List.last_exn digits in
   (x * 10) + y
 
 let solve (lines : string) : int =
-  lines |> String.split_lines |> List.map ~f:recover_value
+  lines
+  |> String.split_lines
+  |> List.map ~f:recover_value
   |> List.fold ~init:0 ~f:( + )
 
 let example_input = {|1abc2
@@ -1105,11 +1109,13 @@ let get_last_digit_exn (s : char list) : int =
 
 let recover_value (line : string) : int =
   let chars = line |> String.to_list in
-  let x, y = (get_first_digit_exn chars, get_last_digit_exn chars) in
+  let x, y = get_first_digit_exn chars, get_last_digit_exn chars in
   (x * 10) + y
 
 let solve (lines : string) : int =
-  lines |> String.split_lines |> List.map ~f:recover_value
+  lines
+  |> String.split_lines
+  |> List.map ~f:recover_value
   |> List.fold ~init:0 ~f:( + )
 
 let example_input =
@@ -1124,7 +1130,7 @@ zoneight234
 let%test_unit _ =
   [%test_eq: int list]
     (example_input |> String.split_lines |> List.map ~f:recover_value)
-    [ 29; 83; 13; 24; 42; 14; 76 ]
+    [29; 83; 13; 24; 42; 14; 76]
 
 let%expect_test _ =
   solve example_input |> printf "%d\n";
@@ -2133,12 +2139,15 @@ ktgfiveone76ghj
 7zgzsevenftkdfour186|}
 
 let%expect_test _ =
-  puzzle_input |> String.split_lines
+  puzzle_input
+  |> String.split_lines
   |> List.map ~f:(fun line ->
          let n = recover_value line in
          printf "%s -> %d\n" line n;
-         n)
-  |> List.fold ~init:0 ~f:( + ) |> printf "%d\n";
+         n
+     )
+  |> List.fold ~init:0 ~f:( + )
+  |> printf "%d\n";
   [%expect
     {|
     mxmkjvgsdzfhseightonetwoeight7 -> 87

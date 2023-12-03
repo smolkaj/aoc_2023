@@ -44,7 +44,7 @@ let example_engine_schematic =
 ...$.*....
 .664.598..|}
 
-type value = { value : int; min_x : int }
+type value = {value : int; min_x : int}
 
 let is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol : bool =
   let exception IsAdjacent in
@@ -58,38 +58,45 @@ let is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol : bool =
   with IsAdjacent -> true
 
 let process (schematic : string) =
-  schematic |> String.split_lines |> Array.of_list |> function
+  schematic
+  |> String.split_lines
+  |> Array.of_list
+  |> function
   | [||] -> 0
   | lines ->
-      let n = Array.length lines in
-      let m = String.length lines.(0) in
-      let is_symbol =
-        Array.init n ~f:(fun y ->
-            Array.init m ~f:(fun x ->
-                let char = String.get lines.(y) x in
-                (not (Char.is_digit char)) && not (Char.equal '.' char)))
-      in
-      let sum = ref 0 in
-      let add_num value ~min_x ~max_x ~y : unit =
-        if is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol then (
-          printf "adding %d\n" value;
-          sum := !sum + value)
-        else printf "not adding %d\n" value
-      in
-      Array.iteri lines ~f:(fun y line ->
-          String.foldi line ~init:None ~f:(fun x num char ->
-              match (num, Int.of_string_opt (String.of_char char)) with
-              | Some num, Some next_digit ->
-                  Some { num with value = (num.value * 10) + next_digit }
-              | Some { value; min_x }, None ->
-                  add_num value ~min_x ~max_x:(x - 1) ~y;
-                  None
-              | None, Some value -> Some { value; min_x = x }
-              | None, None -> None)
-          |> function
-          | None -> ()
-          | Some { value; min_x } -> add_num value ~min_x ~max_x:m ~y);
-      !sum
+    let n = Array.length lines in
+    let m = String.length lines.(0) in
+    let is_symbol =
+      Array.init n ~f:(fun y ->
+          Array.init m ~f:(fun x ->
+              let char = String.get lines.(y) x in
+              (not (Char.is_digit char)) && not (Char.equal '.' char)
+          )
+      )
+    in
+    let sum = ref 0 in
+    let add_num value ~min_x ~max_x ~y : unit =
+      if is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol then (
+        printf "adding %d\n" value;
+        sum := !sum + value
+      )
+      else printf "not adding %d\n" value
+    in
+    Array.iteri lines ~f:(fun y line ->
+        String.foldi line ~init:None ~f:(fun x num char ->
+            match num, Int.of_string_opt (String.of_char char) with
+            | Some num, Some next_digit ->
+              Some {num with value = (num.value * 10) + next_digit}
+            | Some {value; min_x}, None ->
+              add_num value ~min_x ~max_x:(x - 1) ~y;
+              None
+            | None, Some value -> Some {value; min_x = x}
+            | None, None -> None
+        )
+        |> function
+        | None -> () | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+    );
+    !sum
 
 let%expect_test _ =
   example_engine_schematic |> process |> printf "Final value: %d\n";
@@ -1497,23 +1504,23 @@ let process (schematic : string) =
   in
   Array.iteri lines ~f:(fun y line ->
       String.foldi line ~init:None ~f:(fun x num char ->
-          match (num, Int.of_string_opt (String.of_char char)) with
+          match num, Int.of_string_opt (String.of_char char) with
           | Some num, Some next_digit ->
-              Some { num with value = (num.value * 10) + next_digit }
-          | Some { value; min_x }, None ->
-              add_num value ~min_x ~max_x:(x - 1) ~y;
-              None
-          | None, Some value -> Some { value; min_x = x }
-          | None, None -> None)
+            Some {num with value = (num.value * 10) + next_digit}
+          | Some {value; min_x}, None ->
+            add_num value ~min_x ~max_x:(x - 1) ~y;
+            None
+          | None, Some value -> Some {value; min_x = x}
+          | None, None -> None
+      )
       |> function
-      | None -> ()
-      | Some { value; min_x } -> add_num value ~min_x ~max_x:m ~y);
+      | None -> () | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+  );
   let sum = ref 0 in
   gear_nums
   |> Array.iter ~f:(fun row ->
-         Array.iter row ~f:(function
-           | [ x; y ] -> sum := !sum + (x * y)
-           | _ -> ()));
+         Array.iter row ~f:(function [x; y] -> sum := !sum + (x * y) | _ -> ())
+     );
   !sum
 
 let%expect_test _ =
@@ -1664,4 +1671,4 @@ let puzzle_input =
 
 let%expect_test _ =
   puzzle_input |> process |> printf "%d\n";
-  [%expect{| 81463996 |}]
+  [%expect {| 81463996 |}]

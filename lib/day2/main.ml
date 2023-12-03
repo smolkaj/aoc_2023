@@ -33,11 +33,11 @@ type color = Red | Green | Blue [@@deriving sexp, compare, equal, hash]
 type hand = color -> int
 
 let sexp_of_hand (h : hand) : Sexp.t =
-  [ (Red, h Red); (Green, h Green); (Blue, h Blue) ]
+  [Red, h Red; Green, h Green; Blue, h Blue]
   |> List.filter ~f:(fun (_, n) -> n <> 0)
   |> [%sexp_of: (color * int) list]
 
-type game = { id : int; hands : hand list } [@@deriving sexp_of]
+type game = {id : int; hands : hand list} [@@deriving sexp_of]
 
 let empty_hand : hand = fun _ -> 0
 
@@ -48,13 +48,15 @@ let parse_color_exn = function
   | s -> failwith (Printf.sprintf "invalid color: \"%s\"" s)
 
 let parse_game_header_exn (header : string) : int =
-  header |> String.strip
+  header
+  |> String.strip
   |> String.chop_prefix_exn ~prefix:"Game "
-  |> String.strip |> Int.of_string
+  |> String.strip
+  |> Int.of_string
 
 let merge_disjoint_hands_exn (h1 : hand) (h2 : hand) =
   let merge_disjoint n m =
-    match (n, m) with x, 0 | 0, x -> x | _ -> failwith "not disjoint"
+    match n, m with x, 0 | 0, x -> x | _ -> failwith "not disjoint"
   in
   let red = merge_disjoint (h1 Red) (h2 Red) in
   let green = merge_disjoint (h1 Green) (h2 Green) in
@@ -62,24 +64,29 @@ let merge_disjoint_hands_exn (h1 : hand) (h2 : hand) =
   function Red -> red | Green -> green | Blue -> blue
 
 let parse_hand_subset_exn (subset : string) : hand =
-  subset |> String.strip |> String.split ~on:' ' |> function
-  | [ num; color ] ->
-      let num = num |> String.strip |> Int.of_string in
-      let color = color |> String.strip |> parse_color_exn in
-      fun c -> if [%equal: color] c color then num else 0
+  subset
+  |> String.strip
+  |> String.split ~on:' '
+  |> function
+  | [num; color] ->
+    let num = num |> String.strip |> Int.of_string in
+    let color = color |> String.strip |> parse_color_exn in
+    fun c -> if [%equal: color] c color then num else 0
   | _ -> failwith "invalid"
 
 let parse_hand_exn (hand : string) : hand =
-  hand |> String.strip |> String.split ~on:','
+  hand
+  |> String.strip
+  |> String.split ~on:','
   |> List.map ~f:parse_hand_subset_exn
   |> List.fold ~init:empty_hand ~f:merge_disjoint_hands_exn
 
 let parse_game_exn (game_record : string) : game =
   match String.split game_record ~on:':' with
-  | [ header; hands ] ->
-      let id = parse_game_header_exn header in
-      let hands = String.split hands ~on:';' |> List.map ~f:parse_hand_exn in
-      { id; hands }
+  | [header; hands] ->
+    let id = parse_game_header_exn header in
+    let hands = String.split hands ~on:';' |> List.map ~f:parse_hand_exn in
+    {id; hands}
   | _ -> Printf.sprintf "invalid game_record: \"%s\"" game_record |> failwith
 
 let parse_games_record_exn (games_record : string) : game list =
@@ -93,8 +100,11 @@ Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|}
 
 let%expect_test _ =
-  example_record |> parse_games_record_exn |> [%sexp_of: game list]
-  |> Sexp.to_string_hum |> print_endline;
+  example_record
+  |> parse_games_record_exn
+  |> [%sexp_of: game list]
+  |> Sexp.to_string_hum
+  |> print_endline;
   [%expect
     {|
     (((id 1)
@@ -116,12 +126,14 @@ let is_legal_game (game : game) ~(max_hand : hand) : bool =
   List.for_all game.hands ~f:(fun hand ->
       hand Red <= max_hand Red
       && hand Green <= max_hand Green
-      && hand Blue <= max_hand Blue)
+      && hand Blue <= max_hand Blue
+  )
 
 let example_max_hand = function Red -> 12 | Green -> 13 | Blue -> 14
 
 let%test _ =
-  {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green|} |> parse_game_exn
+  {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green|}
+  |> parse_game_exn
   |> is_legal_game ~max_hand:example_max_hand
 
 let%test _ =
@@ -142,13 +154,15 @@ let%test _ =
   |> not
 
 let%test _ =
-  {|Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|} |> parse_game_exn
+  {|Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|}
+  |> parse_game_exn
   |> is_legal_game ~max_hand:example_max_hand
 
 let solve ~(record : string) ~(max_hand : hand) : int =
-  record |> parse_games_record_exn
+  record
+  |> parse_games_record_exn
   |> List.filter ~f:(is_legal_game ~max_hand)
-  |> List.map ~f:(fun { id; _ } -> id)
+  |> List.map ~f:(fun {id; _} -> id)
   |> List.fold ~init:0 ~f:( + )
 
 let%test_unit _ =
@@ -284,38 +298,55 @@ The power of a set of cubes is equal to the numbers of red, green, and blue cube
 For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?   
 *)
 
-let get_min_hand { hands; _ } : hand =
+let get_min_hand {hands; _} : hand =
  fun c ->
   List.map hands ~f:(fun h -> h c)
   |> List.max_elt ~compare:Int.compare
   |> Option.value ~default:0
 
 let%expect_test _ =
-  "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green" |> parse_game_exn
-  |> get_min_hand |> [%sexp_of: hand] |> Sexp.to_string_hum |> print_endline;
+  "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+  |> parse_game_exn
+  |> get_min_hand
+  |> [%sexp_of: hand]
+  |> Sexp.to_string_hum
+  |> print_endline;
   [%expect {| ((Red 4) (Green 2) (Blue 6)) |}]
 
 let%expect_test _ =
   "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue"
-  |> parse_game_exn |> get_min_hand |> [%sexp_of: hand] |> Sexp.to_string_hum
+  |> parse_game_exn
+  |> get_min_hand
+  |> [%sexp_of: hand]
+  |> Sexp.to_string_hum
   |> print_endline;
   [%expect {| ((Red 1) (Green 3) (Blue 4)) |}]
 
 let%expect_test _ =
   "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red"
-  |> parse_game_exn |> get_min_hand |> [%sexp_of: hand] |> Sexp.to_string_hum
+  |> parse_game_exn
+  |> get_min_hand
+  |> [%sexp_of: hand]
+  |> Sexp.to_string_hum
   |> print_endline;
   [%expect {| ((Red 20) (Green 13) (Blue 6)) |}]
 
 let%expect_test _ =
   "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red"
-  |> parse_game_exn |> get_min_hand |> [%sexp_of: hand] |> Sexp.to_string_hum
+  |> parse_game_exn
+  |> get_min_hand
+  |> [%sexp_of: hand]
+  |> Sexp.to_string_hum
   |> print_endline;
   [%expect {| ((Red 14) (Green 3) (Blue 15)) |}]
 
 let%expect_test _ =
-  "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green" |> parse_game_exn
-  |> get_min_hand |> [%sexp_of: hand] |> Sexp.to_string_hum |> print_endline;
+  "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"
+  |> parse_game_exn
+  |> get_min_hand
+  |> [%sexp_of: hand]
+  |> Sexp.to_string_hum
+  |> print_endline;
   [%expect {| ((Red 6) (Green 3) (Blue 2)) |}]
 
 let get_power_of_game game =
@@ -323,7 +354,9 @@ let get_power_of_game game =
   hand Red * hand Green * hand Blue
 
 let solve_power (record : string) =
-  record |> String.split_lines |> List.map ~f:parse_game_exn
+  record
+  |> String.split_lines
+  |> List.map ~f:parse_game_exn
   |> List.map ~f:get_power_of_game
   |> List.fold ~init:0 ~f:( + )
 
