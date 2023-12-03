@@ -29,13 +29,6 @@ In the example above, games 1, 2, and 5 would have been possible if the bag had 
 Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
 *)
 
-let example_record =
-  {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
-Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
-Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
-Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|}
-
 type color = Red | Green | Blue [@@deriving sexp, compare, equal, hash]
 type hand = color -> int
 
@@ -44,7 +37,7 @@ let sexp_of_hand (h : hand) : Sexp.t =
   |> List.filter ~f:(fun (_, n) -> n <> 0)
   |> [%sexp_of: (color * int) list]
 
-type game = Game of { id : int; hands : hand list } [@@deriving sexp_of]
+type game = { id : int; hands : hand list } [@@deriving sexp_of]
 
 let empty_hand : hand = fun _ -> 0
 
@@ -86,28 +79,72 @@ let parse_game_exn (game_record : string) : game =
   | [ header; hands ] ->
       let id = parse_game_header_exn header in
       let hands = String.split hands ~on:';' |> List.map ~f:parse_hand_exn in
-      Game { id; hands }
+      { id; hands }
   | _ -> Printf.sprintf "invalid game_record: \"%s\"" game_record |> failwith
 
-let parse_games_record (games_record : string) : game list =
+let parse_games_record_exn (games_record : string) : game list =
   games_record |> String.split_lines |> List.map ~f:parse_game_exn
 
+let example_record =
+  {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|}
+
 let%expect_test _ =
-  example_record |> parse_games_record |> [%sexp_of: game list]
+  example_record |> parse_games_record_exn |> [%sexp_of: game list]
   |> Sexp.to_string_hum |> print_endline;
-  [%expect {|
-    ((Game (id 1)
+  [%expect
+    {|
+    (((id 1)
       (hands (((Red 4) (Blue 3)) ((Red 1) (Green 2) (Blue 6)) ((Green 2)))))
-     (Game (id 2)
+     ((id 2)
       (hands
        (((Green 2) (Blue 1)) ((Red 1) (Green 3) (Blue 4)) ((Green 1) (Blue 1)))))
-     (Game (id 3)
+     ((id 3)
       (hands
        (((Red 20) (Green 8) (Blue 6)) ((Red 4) (Green 13) (Blue 5))
         ((Red 1) (Green 5)))))
-     (Game (id 4)
+     ((id 4)
       (hands
        (((Red 3) (Green 1) (Blue 6)) ((Red 6) (Green 3))
         ((Red 14) (Green 3) (Blue 15)))))
-     (Game (id 5)
-      (hands (((Red 6) (Green 3) (Blue 1)) ((Red 1) (Green 2) (Blue 2)))))) |}]
+     ((id 5) (hands (((Red 6) (Green 3) (Blue 1)) ((Red 1) (Green 2) (Blue 2)))))) |}]
+
+let is_legal_game (game : game) ~(max_hand : hand) : bool =
+  List.for_all game.hands ~f:(fun hand ->
+      hand Red <= max_hand Red
+      && hand Green <= max_hand Green
+      && hand Blue <= max_hand Blue)
+
+let%test _ =
+  {|Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green|} |> parse_game_exn
+  |> is_legal_game ~max_hand:(function Red -> 12 | Green -> 13 | Blue -> 14)
+
+let%test _ =
+  {|Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue|}
+  |> parse_game_exn
+  |> is_legal_game ~max_hand:(function Red -> 12 | Green -> 13 | Blue -> 14)
+
+let%test _ =
+  {|Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red|}
+  |> parse_game_exn
+  |> is_legal_game ~max_hand:(function Red -> 12 | Green -> 13 | Blue -> 14)
+  |> not
+
+let%test _ =
+  {|Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red|}
+  |> parse_game_exn
+  |> is_legal_game ~max_hand:(function Red -> 12 | Green -> 13 | Blue -> 14)
+  |> not
+
+let%test _ =
+  {|Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green|} |> parse_game_exn
+  |> is_legal_game ~max_hand:(function Red -> 12 | Green -> 13 | Blue -> 14)
+
+let solve ~(record : string) ~(max_hand : hand) : int =
+  record |> parse_games_record_exn
+  |> List.filter ~f:(is_legal_game ~max_hand)
+  |> List.map ~f:(fun { id; _ } -> id)
+  |> List.fold ~init:0 ~f:( + )
