@@ -1,0 +1,7 @@
+(library
+ (public_name aoc_2023.day3)
+ (inline_tests)
+ (name day3)
+ (libraries base stdio)
+ (preprocess
+  (pps ppx_inline_test ppx_jane)))

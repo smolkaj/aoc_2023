@@ -154,7 +154,7 @@ let solve ~(record : string) ~(max_hand : hand) : int =
 let%test_unit _ =
   [%test_eq: int] (solve ~record:example_record ~max_hand:example_max_hand) 8
 
-let steffen_puzzle_input =
+let personal_puzzle_input =
   {|Game 1: 4 blue, 7 red, 5 green; 3 blue, 4 red, 16 green; 3 red, 11 green
 Game 2: 20 blue, 8 red, 1 green; 1 blue, 2 green, 8 red; 9 red, 4 green, 18 blue; 2 green, 7 red, 2 blue; 10 blue, 2 red, 5 green
 Game 3: 2 red, 5 green, 1 blue; 3 blue, 5 green; 8 blue, 13 green, 2 red; 9 green, 3 blue; 12 green, 13 blue; 3 green, 3 blue, 1 red
@@ -257,5 +257,6 @@ Game 99: 3 red, 1 green, 5 blue; 1 red; 3 blue, 4 red; 3 blue, 1 green, 5 red
 Game 100: 3 red, 3 blue, 10 green; 3 green, 1 blue, 6 red; 5 red, 4 green, 7 blue|}
 
 let%expect_test "puzzle_solution" =
-  solve ~record:steffen_puzzle_input ~max_hand:example_max_hand |> printf "%d\n";
+  solve ~record:personal_puzzle_input ~max_hand:example_max_hand
+  |> printf "%d\n";
   [%expect {| 2512 |}]
