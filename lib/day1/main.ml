@@ -1052,3 +1052,2093 @@ ktgfiveone76ghj
 let%expect_test _ =
   solve puzzle_input |> printf "%d\n";
   [%expect {| 55621 |}]
+
+(*
+--- Part Two ---
+Your calculation isn't quite right. It looks like some of the digits are actually spelled out with letters: one, two, three, four, five, six, seven, eight, and nine also count as valid "digits".
+
+Equipped with this new information, you now need to find the real first and last digit on each line. For example:
+
+two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+In this example, the calibration values are 29, 83, 13, 24, 42, 14, and 76. Adding these together produces 281.
+
+What is the sum of all of the calibration values?   
+*)
+
+let rec get_first_digit_exn (s : char list) : int =
+  match s with
+  | [] -> failwith "no digit found"
+  | '0' :: _ | 'z' :: 'e' :: 'r' :: 'o' :: _ -> 0
+  | '1' :: _ | 'o' :: 'n' :: 'e' :: _ -> 1
+  | '2' :: _ | 't' :: 'w' :: 'o' :: _ -> 2
+  | '3' :: _ | 't' :: 'h' :: 'r' :: 'e' :: 'e' :: _ -> 3
+  | '4' :: _ | 'f' :: 'o' :: 'u' :: 'r' :: _ -> 4
+  | '5' :: _ | 'f' :: 'i' :: 'v' :: 'e' :: _ -> 5
+  | '6' :: _ | 's' :: 'i' :: 'x' :: _ -> 6
+  | '7' :: _ | 's' :: 'e' :: 'v' :: 'e' :: 'n' :: _ -> 7
+  | '8' :: _ | 'e' :: 'i' :: 'g' :: 'h' :: 't' :: _ -> 8
+  | '9' :: _ | 'n' :: 'i' :: 'n' :: 'e' :: _ -> 9
+  | _ :: s -> get_first_digit_exn s
+
+let get_last_digit_exn (s : char list) : int =
+  let rec loop = function
+    | [] -> failwith "no digit found"
+    | '0' :: _ | 'o' :: 'r' :: 'e' :: 'z' :: _ -> 0
+    | '1' :: _ | 'e' :: 'n' :: 'o' :: _ -> 1
+    | '2' :: _ | 'o' :: 'w' :: 't' :: _ -> 2
+    | '3' :: _ | 'e' :: 'e' :: 'r' :: 'h' :: 't' :: _ -> 3
+    | '4' :: _ | 'r' :: 'u' :: 'o' :: 'f' :: _ -> 4
+    | '5' :: _ | 'e' :: 'v' :: 'i' :: 'f' :: _ -> 5
+    | '6' :: _ | 'x' :: 'i' :: 's' :: _ -> 6
+    | '7' :: _ | 'n' :: 'e' :: 'v' :: 'e' :: 's' :: _ -> 7
+    | '8' :: _ | 't' :: 'h' :: 'g' :: 'i' :: 'e' :: _ -> 8
+    | '9' :: _ | 'e' :: 'n' :: 'i' :: 'n' :: _ -> 9
+    | _ :: s -> loop s
+  in
+  loop (List.rev s)
+
+let recover_value (line : string) : int =
+  let chars = line |> String.to_list in
+  let x, y = (get_first_digit_exn chars, get_last_digit_exn chars) in
+  (x * 10) + y
+
+let solve (lines : string) : int =
+  lines |> String.split_lines |> List.map ~f:recover_value
+  |> List.fold ~init:0 ~f:( + )
+
+let example_input =
+  {|two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen|}
+
+let%test_unit _ =
+  [%test_eq: int list]
+    (example_input |> String.split_lines |> List.map ~f:recover_value)
+    [ 29; 83; 13; 24; 42; 14; 76 ]
+
+let%expect_test _ =
+  solve example_input |> printf "%d\n";
+  [%expect {| 281 |}]
+
+let puzzle_input =
+  {|mxmkjvgsdzfhseightonetwoeight7
+3five4s84four9rtbzllggz
+75sevenzdrpkv1onetwo
+3q7ctkghhqkpb5four
+ccxpblrgrjxcgrhjxfmtwonine8eightzzrdn4
+6lqjrhbnxxcqlpnmjsthreesixxsxcgqsxmdx7
+35llbrhh
+fivethreejcqpfqmcmvjlmhlbzpxlsmktzkmtmv8p
+3369eightnine89
+onesix4qqnlzdsevennmmrcgkndlsgm3
+two4xgdjdqtcjk1threelkjdxvfivesix
+sixsix6njhqrnine
+4skbhsbtqc
+one11fpkjsix
+kgtkgdjtwo6mmklqc
+kqfqq39gnncltrtpgtwo5bxmx
+jdqgmr5jtz
+6hltxnninesmfzpnqjnkcrstv
+twotwo6eightqcncghjvqfcv5
+4ppzhcvqrnkqonehlhlcqmrq
+1xldgvsix67
+2six1bsxxgbonefour
+stwone3qlrfive314sixsix
+tfkbqvreight34r
+five4eight
+rvsmznr4eightjqckcr6nine6rhpnmxrhdc
+xpqldjttwompcfseven8seven8two
+fourclkthghllzlhrs31
+2hpmvfbm8seven5v58
+3qnfqtgndveightthree
+fivethreervmhvzgeightvzc63
+hlpsp9nqnsvhdcfourfivestcz
+nineninedtfivefive4
+gb9twoseven
+1fourfive4seveng
+tmlsix2fiveninefourgjltplkfcnine
+one3sdrckqtzdzgvtl7vtwo
+s2fdklslhzrxktzzttxdtnx1
+three8vhssix9hhtrxkbpjp39mcchnpp
+37three5btqxsqkszchfivebvbbddssvc
+z5onefour
+3eightrthplstr2gbbkddhdqvctlsj
+zmtfdb9
+4d
+fivetwo9
+sevensevenonefour9fgm
+rcqnineseven2
+sevenjssstgtdn47
+34jbdxspph
+zthreeeight9sdnzqqhnpvdrmpfq
+8nineoneoneoneeight
+k3
+sevenfive4sixninesxflqs2
+8hplbktr
+sevenfive6nsmqrmflsfxctgjx
+954mpcnggqmv
+four9four
+185qhonezszbfive
+oneninetwosix3eightb21
+sixqrhphxsvj15three
+43jnvvlsqsvk
+oneqxvjlddgfkgjdjgpvcvz5
+lkkgzfbdsjzpslnqseven12ninedxhtjgx
+1nine62fivefmxvgr7
+s32eight3seven9nine
+eightldxdrtwo1krrnj8vdrchq
+gmdm81
+five7two36dzgqninef
+2four4461three
+fourshbdbvsixklsdgggb6
+bfsfl1
+5bnvzgtbrsngdbqldmzlhk4
+seven1tbjfkmqdpmlkfmqcjl3bzhzfk
+22rmsfjstcglnrnninefivesbglz
+6sixssg915jthkkfhj
+fourseven81945
+4s5two
+bzrnthreephhptdvfourjbsteighthkzqbtlczmkjrmh9
+eight5zsbnine3tgllxqjbf8
+2twotwotlgdbnstp7hvgpkgvdkmmzpzf
+sixfourr9onelfzvfm4
+lgsmmjmnl713339sdfour
+threefive9fivenine7nine
+eight68four5threeseven6two
+sixeightnfkrzxlvfx5drhptm
+3one7jqtpzggzplphrzbnplnfivefour
+eightcqksvtdzmsjssnjtf5eight1
+2three4tzzlv
+1zfctfccn1fourhnmnklgtwo3nine
+ninembcfmxnkqb1four46kgddneightfgxsnkzd
+qpjbjmhkclkcznkx1ninefivesix5eight
+njhpf5ninefive
+7jtwo
+two79mvmtbthreesix
+threeqcnhzcfk7five8jnk1
+kcdflseven69
+eightninekpjpcbhd4
+3five2ghlgr
+615pgtjhqqttsixone8six
+nxsqklg3three8
+fourtwo889nzfnqckbpslone
+mtzzpfour4pxftwo
+phzgbcghsixclrrrfourseven3
+cqpccvmvqnine56mmmtqfp
+gdzrsxdhklrlpmkjqzd8
+1fjltwo
+fivethree9
+6512krnnxdxzprbtlgcfoneeightwohfl
+toneightfive5two
+4sixbrcbxq
+4hphcpfxppdnhxrmlhfourxfkjb
+tdgpntzgz36
+8zhtrnglsix6sixhdlqkfrzvmcztwo4
+xjxph74
+three3qs7sevenpkjone18twonek
+fiveseven4
+2eightrlnine8eightrbjpml3nine
+fourninethree2three5four4
+rmrvbjblcjpdpvckprzdrdpbdtcmrndhphbbhxpzmtwo53bdxzcn
+cvdpnd89four
+168five
+eightg29tgvfqdzmgstvbtftfour79
+foursevennvmgqvxhvg6seven
+6one57onefour6
+one7ninethldxfvthree86dfjxq
+bjeightwo7fourfive
+jmone3946eightwor
+fivexrqhzmsix9four
+hldhs2vhtljcqbsseveneight
+ninefivenine2fiveb
+3hqzninenine
+nnpd7seven8
+51mfkr1gjzrcrx6fpsdg7six
+zxthreexfzfzckhhggtwo7
+bvmspnxl9mslb8fiveninetwo2seven
+nrgmcfgzcthreefivenvvnxzonenine91jsvfkhv
+threethree5four
+7vclcnxdnmxqc4twobx
+22qsthnkclllmlcmthree
+1hz2xeightseven3cpbjtpv
+65hpvfkkeight2
+eight69
+6sixslschzjxs8rlgjkbqjzhhx2seven
+9qdhjctdfzzqv2eightthreexfl
+oneqjtbnn68seven
+hdzmhfsvch422mcb1one5
+55nine3sevensixfive
+lxjrrhkdztwonvmgbbkqxpxgtwo7vdvvzh
+kcfctfdpfnseven87ninesixsjkxxn
+2twoeighthqllthree
+dgjkvnbrh89
+pxmbhhtlmqhdbqkxftk4cx6rljkgx
+9seventwoeight65mvmgpfxtrghzd
+hd3vhbxgpsevennzhlzseven6
+83one
+2kztrbbkj2cmjzm7
+1sdzkctzqtwo
+6vxjgvmsz1onepgdkrtrd
+52kmspbvqbpzbscjtzkm79onelhzrfmp
+1259one4gztcz
+jlmrvtxjphtwo2
+zrldjg2two
+sixdhsfvqrnseven5ms1
+gmrdkgqb8lmlpzjfflsbkjnntjc9eightcdpdq
+4nvxdvgjrnzdtblhxfsvdpvm3seven1tlkhfzmjqp
+dxjjbv4lvc39bscvppc91
+c6
+dvftxktvsonehcprkszlbfive1jxckpvknfthxnsm2
+drglpjtm1fivesixccr
+five35ksnljjnpdnine
+three92
+3hbsgfrxqxgpsbsevencxthree5
+1flnzjsseven2
+176eight6tskbvc
+5seventhreesixfivebqtjtwoneff
+kghrvxcpgplfdrxxtflbfffivetwo1fourseven
+nine1twothreezjrmdcsclgfourtqbstp
+ffggc4
+sevendqhkddzpvxsix92jncd
+hzgcggpgn867mmvtvd193
+9qkgzfd
+sixcrkcrhgpj3497935
+eight4pmknqkklc
+sixoneonerxqpfljvleightsix2eight3
+fourfivegznjlplsmpjrbhd61lone
+threeseven1one1two8
+986lsixdqkpljbx8
+lggq8fouroneftp5
+loneightfivethreemfn19
+eightseventwo29four
+5phtlbfdbltbls99699
+8lnbqbslmqmhkvzvnkmxhllpngcm9one8oneightz
+vfqprdmklzgklllm362tcdvvlmvdnjsixeight
+2dbltlmcxklxqlvhgmkkgfr
+five31468threercbjkvtqgm
+ngzpnljmdcrqt86hphtnblsxmg5tnsltm
+4mtzpfxrzrrdltjbmgjksix
+qztnrrsgkrsskdvj4skfnx6
+571four
+1eightxd3
+2four98n366k
+sixbbztnkf3fourfourhvs5nine
+jsftxsix4ninethreetwok
+9mbskphxtmpthree6nine
+bm6fourghmnrnsmtwotwofournssrseven
+9bnkcmdpsssix48
+fivefourptglzp9
+14gmrfdjmkbjlnine
+threetqq3
+two474two4
+tdctzcztgnthreefive1sevenxfqzcjcj
+8tph1sevenone9thppone
+six3ntvjfgdv6seven
+77nine1twobszrsjffqcvhqv
+19123threesixone
+83sixsixtwoseven6
+cjqnine3btn
+gjdlvzct1
+498bvcdrznineonetwo
+rmcnshlzxlthmtfjqdn3ktwonem
+three9one9ninesevenzpv5
+qtfv1fivefourthreet3one
+ldpb7three
+fxfrxbhfour9nine25threejkmthznj1
+7three19rffgprxfjzk4
+four91
+mfbfhnh771two9eight
+5rhrseven
+4three2sevenone
+eight58
+eight6one54np
+ncc4two9646
+xgboneight4
+7373ngvsgr
+foursevendhtgrlrtflxvlonezxxrghjgrzpcmrkdxhtchs9
+mfoursixcneight188
+3xlpkjshjz
+sbppcxpnxkjm3fivenrmqzkcdrz9eight9
+eight8threek38eightlfzone
+1lpfhddpqsevennine2four
+rvnjdqkj6eightsixdxjbt2
+46sixsix
+8eighttwocscdgpsz119bdv
+1nkmvbcgxs9ninesix68czshseven
+sixtfx9
+threetbksevenone1tzmsvspqjhtwotjfdqt
+ktztwoseventscssk14
+4z4
+zfd998threekvonebgpxtqxv9
+onesevenone3
+three5fivepzsqvm2
+srvbvkb7one7threejmmlxjvxcnxqggcvtk5
+mvcsix2onegfzzrrqsixeightsevenpmmbmdqvfq
+1fsxsnhrpkfh5xcphtfmjdb
+91tqmbkxjhg
+threefivenfjz1eight5sixseven
+5eightfive
+4fiveblhqn
+23seventhreesevenfour
+twofourkqgone2cmtkzldj8
+deightwomqvlxpvthreetwotwof8
+seven7lrrtlsxmpngvstfk9
+threeknchdjnine3k
+2fourfourvhnqthfivevbzsfcseven
+frfxctwodzjlqcqfj319
+fz7three
+mmn8sixtxmgtwothreeprk3eightwoznl
+2xjsevenct
+551sixkhd
+3sevensfck64two
+2pmxrtkzrsix26lrtwo
+jlqbhmsvmthreefive2tdpjgqgngjjsgmpsix8
+tgtfqplcrsseven1skpfnr8cfrxvn7
+mvpl755three2seventwothree
+3b
+cdfjmnkjsix2twoeight5gsxsc
+3l3gqcmjhtk
+9mlftpmmlqctonegpbfstpcnhmm53
+4ninedbztjvvqone5zcnqhh
+six5n2tzzhvll2eight
+mfcb81phsqmczzsix
+cm41oneseven3
+vkkgh2fqs
+seven8dhfkghhsix
+7jnqxnrvbsg54sixtwonedn
+stvsix2leightprsllnlmtjqc6seven
+four2threenine4onethree
+fiveqqhfivenine9
+four85two8
+5two756twooneightr
+679
+xlbbxrhkt4dqdcbkddoneoneightjb
+6sixthreethreefdzjcqjgjpxfour5
+deightwosix4six51seven
+dkgkgjhc6sevensevenninefivepvbrthreetz
+rdqxbbninefvkvdhmgr61nineeight
+3nzdvnljf71fiveeight
+zcscbkleightvvtxbqbgmr361
+mqhxninebtfrfour9eight8six4
+onezdfdc351
+rrtwonesixtn4eight23
+sevenfivethreezmbjmfiveeight4four
+pmfpfjhs58eight
+six88tvdsxdll
+four8cgm3eight
+pprsdrtwokk9seven
+sddbkzfczc9
+qsevenone6hc47jbzvpbgj
+3hpdmbpmrtrzhkdfivecpdcgqcnfcfiverrhksnpcd
+7six946
+nqptzsixsnpqqmjpzmgfheight3
+2fdlprcxtrn
+73lnine9
+eight2mrkrqfive
+sevenllscmf6sjqbjvdqzd8khxvpninezctzf8
+33xdseven5436
+mnbhzx3threeonetwoone
+sixsixtwoxrhfive79
+eightzdbm7sevenzhtl
+djlmh9threefour
+six7xmlg89
+seven97sixsix4hsgzlm9
+6eightsix2m
+tnrzjjxggd9zjckhbrhmvfouronetwo6
+cdhjfvnine82sixonefourdkpsg4
+65vrsvponenine
+fivelkpvpone9gjqxf1ninesevenkfrkjqkfb
+7twoqst
+mggftm2five99four
+threeonejjshqfeight3three74
+1h97lfnvdgqlhjmqbqffive
+bk88nine
+eightone2three7
+3hsvjpfrpv
+5sixtwoeightltnvmzsb
+3zxqrfkgc
+two93njsmdsixsevenfournklz8
+6nlmtheightdjsnklrpbb
+3threelpbznvzghpnrveightsixseven
+4djqnvrksmdrgfnqglg3two
+411vqljd3
+7ninelmbqlthree
+two35ninefnhfrsixfive6qzlptcpgh
+four1pmkfcpkh8nine
+1gzfgmbqbmpqr1tvkrntdn
+5sevenseveneightfour4zttvtwolnrkqd
+1sfouronepgmckxvhtwo69
+jmbqfour1eightwot
+sixonevq5
+r3sixmn
+rhklqpztgcvxthreesix5onevf77
+5nnzbzjcpc
+twockmmkdpcmhbczbkp2six
+95eight57seven
+bctwone7one8threexspzds
+ninesevenfivevsnxzfxdmf9z995
+7five8gmhlqjvtrqlqgrlngmx4
+gfftcpxeight46
+1nine9two1eight58fxhtmv
+1pmpxzsevenjhxpjmxbfourfour
+7oneeightpzkzzczg
+onenine3threeeightjd9
+fourninecvbmcsctblfour46eightncgkjgt8
+9threesix
+sixonesixqdqqjprfourone62
+deightwofourhdb6eight6
+52six4jtlphxslh8
+4tsdjnkqkcrtwo4
+6two5rbggpdz9ninesixjctmfkdhz
+xtftfgvkcp1foureight
+oneqvdphhjzqmqdb8
+8two8slfvgbqqhq
+bnnzlseven41l25sevenb
+8smzbc
+941eight
+vlcszrbhssdhvkcfcnpffhone7four1
+threesix4hcsnpdfqksfour5three
+7lcnbkbdfmninenmmrffgbrfour
+5hlr8flfldblp4three5twopctglmcq
+3sevenfgvgxxsxdvlbkkhr9
+5sfive
+8fourtwomqtmchfjbkcgpntjpkkkp
+mkjxmqsevennmsspqhzxmrncpstpbfour77jbfz
+8nineone1513
+hgsqzrqcbnjcbdtnlfljnm4four
+cxqnqseven7gmqpffmxgkxdtwo49
+rndoneightccsjmklbxf8tgqph
+twon4
+nsccmbthreebdtjpsixpdc5xbxqqgzf2
+sixglxmmjdvqx9eightntpeightpgzxv7
+pvdtwone8five5tvdlshqnrd884
+fivebfrvnthreecjlzhpglvfphhsix4
+cfnfsf9hrxvpfdvbbfourr949
+3five2psng4
+fourkbbfzlqlvhm3
+zvfqkpzctpreight7threeonehzfxnkj7
+three8one
+16eightsevensix32nine
+nbgqpspvdtsixjkv6cqzpq
+sevenfdfhgrzthree2
+nineqxthree1
+onehmgdksxkninekbbrphbmt6
+5pnrlg7drhdthree925
+two32tqtqk6
+fsknktltdb32seven9
+5464fqtghjrqdpeightvzbx
+92five6scnddkj59
+vrmfoneone93four
+bbbbzfggtd5qzmnlqxssfour7phfjtjjjtggdmpfgzjssvjbgsr
+gncbxjpone22tvfive
+6six9eightjjnvnhdxtjfouronefjbsq
+tconefsnseveneight47six
+hkh4
+3hshtz2seven72one3
+5sevenqqbttbjfdnhlrksthreefive1
+qzcggcmq89qjcglscsp37eightthreepbhdrnbkf
+6xjsxlbldc
+7s4sevensix6
+5twoeight85threefour
+6threekbg7
+3134
+sixtgvxcvfhd1tj
+8sevenxzeightrrdvnpf38nine
+93three
+eight4nfrsjq4eight5
+fournvpfvmqp5
+7fourxvljqmkmshdlczkrhqhmvtwonehn
+qlxq1frdbgrvccnn
+threesix8ngkjtbtv9
+4r
+five8three4ptcnv7
+lnb45xgd
+9lbpclmj4gpxrtmvvdeight7
+three9two3threeknrbxpd6dnf
+5pqk41sevenmqhvcdpllfour9
+86qlxmrghxlcthreebphtqpdrbj
+three6ninevvpfzr24
+eight4zq1vkqdzfjjxqrdxdkgpcp
+8hrvgrzcvvchjt8fxgpqngjstpkqmjkmjgdnrvtxmdzzfour
+rknoneightcmdbr1
+5vsix6
+ninemttonefour4threevjzmsix
+5six5shjhxbplmttbpts
+vsevenonefourrlgvfbfsjmbfzxm3
+8141fourvxzgvfxx9qkdkbdoneightrdl
+twothree6
+mfpqj6onemtvrnbbgphz
+99eightzdnctk
+5zrcrsbthreetwoqqrjtzprnvqczxj3
+7sevencgcnjdlnnlfivethreepmnjjjmkqzkvqgf3three
+onetjqqcxhksmnb3onefive
+2fourthree5foursczlj7fxpfscc7
+qmlf7
+19eight
+fivefour2
+onetwofourone3hhffourtwo9
+8threesevenhhtfllrn2
+eight7pcspzljx2msplsg6bdk
+eightbknvftrbcsixnine4threemppgcdfzhrxcmlqlq
+one46
+3r
+5tpvkrxmthreedn4sfseven
+48two
+s3nkkxzrj
+14jfrbrxr
+4618
+1nnthreesix
+szsmxqcfh1
+ninesevensix4onefbckbkc
+ninefour8
+sfxkhrqbndtrrknhchxzqone9three
+xxzoneightfivebffhhnk27nn
+1threethreeninetwotnbjftcnl
+7two58
+22vbljflmgxrdtqgxchsthrstg2l
+5lklmmcfkdm12dxsix
+threetjsr1
+qcponeight3six9rzvnvbjqzbr8dlhxvfnh
+4one84
+six3txbfhvhmkv19
+jnvjqfeight6eighteightfivel
+8qshjffmdrrmmtl6one3
+7rxvqgnd3mfivefkrkvmfivenine
+8vtxtqg44
+bbhbhkpv7mqzrl58twobkngmjznpmnszmthree
+sevengmrtjdgqrpjxlseven36fouroneeight
+five758eighteight4
+59kshsonesixfive
+lkvtwone1zpkjnbjtjrqppqsksdz
+onesbqtbsffgsixeightnineninexchm2
+9eightnqck2tx
+zhbpbrxjd9
+659fourhdrxjeightlflseven5
+zjmmvhjbm243oneightgp
+3hpfplfkhz9
+6twotwo
+sixfourfoursix1tthree
+xlfour5133bbhmbq
+dhthree5threesix
+pdtmsixfourtwo6rl
+2three5ftfvfktqvmsixseven8ggjnzhzhm
+59four1sczj6jqlsreight
+vrrgrhnj1xgmcmd76two2oneightgqp
+nine5ljscvrfbdnine4four54
+nine6bfqcdczp16
+3oneighth
+bt8three
+26jnllqrrxrhpbnkcj
+tlcnb88onekcxcchxvzseven95rvsxmsh
+bmj53seven9
+one947twosixeight
+l1rqhcjqnmj8mhkgkpskeightz
+fivepsfcqrgjtkthreez9cvgfhpdclgtwofv3
+3hmd7seven5
+drfftcgdvsixkgzspcftsfour86foureight
+rqpvcb4mgdfjcsix1eight
+nine3nine
+1mgqq3six
+5ninerldqnmdh4
+qvkxtthreevddpczxpcv6nine1seven
+fivembc1xjzeightone434
+pfhzttgbpzr6two3231eight
+1eight11two9onethreeeight
+45
+zjrjsgtbfjthreefmkfsclrnjtwo8eight
+4sevenxjzt8one
+sncdbnbm356
+5nineheight6one
+seven4tqthree
+mkdhlmffqv9rcbldrzvtgltcone5oneeightpsnxzlprpm
+4sixqgflnsfive
+hgfphllv3three2two
+tvtkg476
+knnkjxs1cgxoneseven91
+thzxgnnz27eightsixthreetwofour
+tfzptldgnsfive3bqblfdnine
+9tfscsfj33
+zhkfstzlddqbdks6fournine
+hvvjjfournine8six4
+vhq9jsllg862rrrrxfhkn
+7oneseveneightq5xfmtsix
+3three7979
+9dcvdgkmthpzktwofour
+nvvfivezxcgdbxslfshcshbvvkklp9
+qcfqfckd3bcbvmg4b
+gttwonerchfrxhvsixljqxmhrpjb6ninesixonenine
+zfbfgvkx6
+cctfqjseventxjnmjltwo9sixeight
+eightjq9
+sevenflj7four
+65three8trqptndveightfour
+46fkbhhqzgthree7nine43xfxptdxp
+moneightfourcqdvm5sixnine1
+gsbthree7
+tqdlh7seven
+4seven4sixprjslbrvbsix
+eightsixsix8pqchtpttrq7threenine8
+fivehcthreetwoseven4hllhvmleighteight
+five79gmsvqvfour
+fiveninej7seven
+sixglnrtwoxvvc45
+fivetzkdhmbzbvxndxjhljgbd2
+nineeightllpslcxbdvvmrtwo4
+twoshzhlngsixnhftqp9twothree
+5rkdc9eightseven62three
+knrpvflpzjsix3jmftfqmqtlgjnltkfm
+three62fnrtckmnkcvplvtb3k3
+xtbsm8six2six6
+four5sixfivetqeightwozt
+7qxhbpvknqb5sevenkhpphnpfhsix
+29kxbznzxtwo8
+1sixrmfxcfive9
+fourjzmnxfprpbznz32six2
+two5six1nlrtqrcxm
+69eightone18
+fourthreev29sixthreeone
+ninekpjbjm7683
+2ccnpk
+3three3f
+7fourthreenine
+3seven5onefive
+nfsssvfzfive9seveneightfour5sevenpstctrnkmj
+2nlkgsix27c
+lsr1
+vzlbfiveninetwovdrncmmnf3five
+fblnvgx4sqspkgdkgninefhqrxnmgfourseven7
+z5fourcbnbkjzz99eightdbkmrcdhbcsix
+jgvhjddq6vccsbrnonedvsjkrnbeight
+85four7mfqnt8three
+sevenfive95ktghsd
+5ngr34kxqnmdvk
+fourcdr469jvjd2onedqvjqjftz
+8vkmsseven82
+pksixseven9vthrzfouroneightlvr
+87rdnzmgpnvflnqsbvkjq
+sixxtnponejkmvmn6
+gz5q9eight462nine
+gsixthreehvktsix82
+455mcqgnj
+five9zzthqcgvfive5ninepvzxxonecshsghbmpj
+9five7four
+one1sevenhmddjlninesevenfour
+xnhbmdlvgj82fivedvz
+52dnxsseven7rszgdxlhgj
+threeseven34two
+97hsrpcxz2shp8one
+7twofour2jthnzc8
+cveight55eight
+six1lglhzsnkdfivedpnlgcjtldtqmd
+tsqmjxmhxncdpr1jmxmgx2fivelvjltzvhjhone
+mrxtmfmrh3seventhree
+fourtwohk7
+9eighth95pkp
+289fcqzqhlzsfqrg
+tfkqtzhrbvllmvvzggjlzzp28mhpfztxpqsthree
+5eightsv349two
+98five4five
+fivesixthreejfivepbhdlvnkb6
+onefivedfgkdr8one
+236five5sfmjdfive
+sevenqg5
+two4eighthtvcxhxone
+99fivecnsnflqp9six
+fivefourdfjjpv85fourkcttlqdpksxqjzgbgk
+four7cp1
+zpgd2px
+tltlzcf3djmzqjr9five
+2twoninezrfivecttvkjfmmlrckhnrb
+onetwo1sevenddddpklfourdlvsixone
+18924
+8m
+1bblbkt4sixeight
+3xfsthreeonepjjprmvlt
+four8eightptvtcfour
+eightsrfflfxbpvtlbzsdv7two
+fiveninefive5xllzgscseveng
+1eightfivedmvdgzfqjrqnhtsh2eight
+6six8vqfrpkfmkq7pbjrl8d
+6threelbldnpx
+9four78one1four
+vfivesix6
+2twonemg
+sixzsxfsgqonesix7tvhplmf
+threesix56five4
+dt78seven4vzlrzb9
+seven61pfvdnlcq13threenine
+pzvdtfeightsix2four
+six632sevenfivenhmhknkflkjrcfrts
+three4seventhreenqpjmrr
+two3jhjvjqlmls7eight5sevencrzbtxqp
+7jdlgznine
+lg2hfteight3
+8cttggeightsix54czlc2nine
+hc3dkrvqf
+eightks65ninesix
+gttmtsl247
+9eightxnjjf4jbrdbtwoctwomllpfvx
+5ninettpkf
+hvbhhn7knbfk9rfsxrgmfqfzc473
+xpvmvtplxdm9jjhzmpgcddfour7
+3pnzsbbcb3fivecsqhllpkslfqsdv
+sdlseven4six1eight3
+3hfssp1nine4ldtjhsix
+twofour1mqkkvczdbr8five88eightwox
+5fiveone2nine8
+8xvkdtbbdqlmtp6
+9hsksxfnr4lzs7bkhfsh4
+nineseven876ninejl
+6b7eight
+jmvpfjsjvjtwo78bmhnxg
+4vgrzfsptpx6rdrnpbsmckvrglrlfive
+threecrvzssmsnfourfive9jvtcqxbppfs
+three18lbjdvqp
+cntz6xp2
+ttwonejhmjctlz374seven18three8
+56sqh1fvfshgmxxl1
+qsbrnj1
+nine1nine61onethree
+4fourbnz5
+8one8
+six9k
+xj74four2xhxq2
+9sxvspcxrzgfourfiveseven9
+ninermnfknxbtwoonejds9
+five4hpr
+pztthbxhfour8xrmvpgeightslhbngshrs8
+41sixsix8five
+fourcrvxprsjlgglczq7rnmbtwopktrzthree
+fivebdmqrtwop1
+sixnineninehfqmpzzc9
+8sptsqhpzxfccpfivenskklrsmcftwokhlqklznone
+22ttpfbqfnckkdqmptlfdseven
+9onefive2cnjlsd7
+ftsfmbskf37onetmnzgjpcqsrt5bjdeightwosgm
+sevenjseven5rnseven6lsgdr3
+twoeightxdghlhhsjq65oneightz
+rxnfndqlq6
+7rfvztgnh
+zjmklxvsvzlfgpgrtjpdninefivenine9eight
+six3cktxsix1vnbdlfc
+sevenninencdninefour7
+6826
+22eight
+88vsdcvlkniners41qlfive
+seven9eightrxhsndgj1vq88five
+jvpbvsevenfivesix285foureight
+8seven4
+rslvvsixeightlpchthninem6
+bmfkmthree5kqndvprvfive
+8r7hpxrzzxgmcsbnrnhr93
+692
+1zlpvhnfdbtg
+7fivefiveone
+xkfd2eightsevenfourtwonegr
+9fivesixtwo
+rschzfcgrtwotckrdhdtv6mtwo
+6tdxlh
+twofivej2srhpxhj
+58scmtvn3mndnjnbqmsthree5sevenfour
+sixmclmtrlone8bgbtg
+jzrhmgvllh4nxphfssd73
+mbsevenfzbtjqjb5mlgmq
+sz73ghmbqvlhgffdkrrk
+vlkgfhcsqklnkqdmdeight5jfivekvnjlbeightkcfrcgc
+pn3spmgcseighttwohzgmctfour
+5four6nhvkvlbjfour1kmnxskdpd
+865
+twoqknkgggtwoqrvxgvdz83eightghmnphhcsb
+ninefiveeightfq9bszrhqztl7one
+fourbrj2
+lnqnnqbnonenv66
+4xgmjzpbptnine1
+gnvnnfourccfshvbninek8ninekcnhcxkk
+47krxlf
+thsix6jzxxqls2kgxdflrdtxzsix
+4bjdfgxmsjrfivepkpvklmdthreeone5
+hxktj8
+rntwone5
+one77n
+rpcqn5
+zonecvvzpltlkvq19
+rcnxqvqzj9nineeight59trdfxbr
+8eightthreeone
+jbksthreetworszgrht7
+xvk4zfbclkpbeight
+2nineninesixsixfive5
+3seven5
+1jjmffhtxskjmgc6vhvjk
+4six1
+one6five94
+rfqtbxltrhrcnpf7lbd6
+56fiveninenqpfrv
+3eightsix823eightonesix
+threegntdfqltbncn92
+g9eightkbpdqqqbz
+79sevensjsvgbbnjeight
+6sevensixvth23two6
+gxc5bgqtbgknfourcbjeightone3
+five7two
+3nsjnxsjqqqszc4
+8bnxdbqtpggfhkvbqbjkggkqgvrjntxf3mrvmptgptcftspk
+sixlfsvljpjmdsplnjffmsevendll3
+btjkmdsscd566nine
+8zdbhzj
+rrkshvnsixknbxdfjhq4nineeightvkhqnr
+xpfqfthreesixseven1
+tbvgsqcjtctdpvm36
+onenine1rdxxcjgkp
+two1phslfour4cb
+63tvv
+eightfivehtzgmggpxjsevenmsix3
+782eighthgzfdnxqcvngd
+nine8zkqrcv
+pjmgbhsbq367six
+9rlmcphtvr
+three5ktjhxhhdsv75
+hkqbbdgrvbone7q7three1
+6sevenfxf
+one8fvmnz
+three1pmlrhnbg38xj14
+seven51seven9bfxzkzvjeight
+tworjvtdpdvhztwo6zbbcmrszhthree
+zhbxpkhvvdf9nrlvxsqhpvdtbvxhqseven
+five56three3
+qrpgpblxrfpjhtq4onepzx
+lqzmkbhrthreesrdtbgpfmg7
+2sthreeninektktttfive
+32five1four
+hvsh71
+qvvtbg35hvnsevenxzslzvjjdpcfh5three
+ninesevenmcxthmqffv6vrctchjvnv2
+5eight5l
+nineznnghfhjgqgclsv69s
+3tpxxcqtn
+voneightmzxd16h
+1sevenfour39
+onevftpfhpttn8zbsonefourkjgvxbtkf
+five4qjgsjrt
+8nsxz9
+four7twosixsixthreefourfour
+4fourtqbdskvvn
+nine9onehgdtgfzr
+3fiveeightseven
+four92nine6xsptzhlvsdxg
+5two78kmrbn923
+6zkjtprddlxppbrndhcpxgsscnineeight6
+tsmeightwo961eightoneonejpcmsxpstwo
+3three45mfslth5fourrj
+xjqxninelqvlcrfvqtndsevenfive9fourvdlhpt
+three2kmkmcv9onethchqfgtjtqzr
+ffive5x
+613mm25four
+ninehdqhjd4two61eightfive
+kbnmjnfqkone65one3dfxtlseventhree
+twoeightsixsixjv1fourthreetwo
+1vgcbgsevengrzc
+8threensspvzxvtwosmskq2
+mmqvhlhksm5threeqhdgcls65
+c4dllhmcq8pv
+4fivenine775
+1sevenfivepfqzsnz
+3xrfivetwo6kthreesixpdfgjbsk
+onethreetzffmzdq24
+eight4seven6rnqznchsevenseven
+hsklxtnzlcpknhsevenjjxvkzxvm79five
+7bvnnlxpx1six
+pgqkcpzx9ltrdvcv
+8twormcqrdbxnhhhh6
+7lkhmssvbktwoseven
+three7one7sixpntkrttkm
+zbscnhfpqplrzsghjxbjcpjqbgfive9ninesseven
+4fivemxpsvsrone1lmmxqqvkmvprxbtt
+7sevensixtwofouronefivenqdcrprsk
+81twotjkhqzdjs9sgzqbbgf2
+snfgfqchtfk34fivexnjfqqv
+ksjrvrbr6two
+kdvbgptwo4twohqshpjqdnseven8five
+fhdnbzvmsrrndqtcstgtwo3f1dbmt6six
+126
+kdbdgkgkzhbzdgseven524seven
+bqllslqqfrdtvone9ninezbcxpzgzkdzcx
+4ninefourthreeninengshmnfhvf5
+four55cbrhbcpscnnjqxs
+rh7mqbvlfjjnhhlqgqpdffnj6
+93onenine
+hklqshsc7eight4hbbrzqbmvfourkqlsmknine
+sevenblqqsd63five2eight
+threenine1kncghvqmgt
+sixfht5psfxvt
+one4cmxfiveseven
+94ssfour6twojrvscgqzlrnzrbnvrdxtxtzn
+gqfpxxslmkbjsl8threetwojdv
+9lcvgsl
+1nine6sevensix29qjpsix
+9seven7lfsbtnzcbmlq3zqcfmckb
+6v1nbsstmrzkseven4vfjfmtktpc
+7vdnhzgrdgkqmmhcnmjtfive7dnfhmjxndbsnm
+fkczmxzshtsevenszcfbsljzsqcplc124
+eightone582
+1gccxfjhgbc37fourxzdr9n4
+rczkvvonepph1nine833
+1hpbvtk
+onep3nmmdmtrmj29
+txmlgzjtrddxl1nine29vcjnxjbqeight
+2sixktlcqbngvgeighttwofive6vsmzlmfb5
+zlkrfour89threerhnlnd1
+xnbznine43dcvpplpqzv4threeonefive
+fiveoneckrmlzmpn98two
+dgcsix74sevenmflkcrtpb
+fldxlgcqxbv8btdkmrdhsevenrbmzkgkznbninenine
+qvxspxxmr9bsjeight
+622chmv7sqztsssvp3
+8cxspjfnxtrgvpeightnine
+qsninetwo8dpd9five
+zzlbgqoneseveneight15
+fourtwo6qqrjqvhbvbdlsggckb8
+4sixmfkdcbjzv46
+tcxt5twoq
+9jzvkxfourzjxxbbqmlmfs
+1fpxhpjsgfnine6
+1ntnmbj5pz
+five81hhxsnhfourninevnine
+jpmjrdjrrm7three1
+one6fhblldjnbnlzjhhpkdjfkr72threetwo
+6fiveeight7jb7lqkghcmrhvhj
+eight8czbc689
+qqmqspdtwo4ntbkmbbvkqpfzrksgcktlznj
+ninefiveseven88618
+qjxcchckrmtwoone326
+1gjcklxrnbtmfqnvlnkfgz13kkptcjqndr9nine
+hchgvsbfour7fourlgjkcrthreeninekvvqhzrleight
+nmgdxt1
+seven5four6667threeeight
+one2kcsddzkl3
+nzdtjvxj739tbdvc7
+oneone5three
+onefourxqxkjq5
+23bljlvpltnbcxmmgslrhksjdlbzhddrfourseventhree
+3five68vpxkmrb
+7crfeight
+1ktvdhsmxq
+6pkr7seven
+sixpmrpqtndhxxjheight88fiveqzgsftgfvhbnjdjtktp
+73two2eight4three57
+5foursix79625
+43fourtwo13mmctvsrljtvd
+5ddrjxjhfhjbdgmmgsqzpnlt5lfktpkbthncvjntnns
+threeqnpknxvnfthreeqdmfour1tq
+8rqdkzdjvpngdhzr6kqpcreightn
+zrmtrpl13foursevenonejmvthree
+zghbcdcrdqjtqgvnine2sevensix3nhqk
+xmtxjmllhsbn1mtxvvrjftwo
+78btvheight
+four5seven68pzllptfqmxh2
+onesevenlbsp6eightsixtwoninelpfl
+fhnttk3sixnfqvhdqhnfgpglpbpltfqjvkkmz
+69three76
+pxkh55
+vtqfklninemxgnzspgl8
+53three7
+fiveeighthfive89fivexdbpthree
+5lcvlpgxjmsqzbffcvpxrhtvbbcp
+lfnine89sevenone9
+8lsthlhtbpfour
+1twofour7b
+3ncrzdmzsqfbvgjpx
+fivenhcvbntlcfthreemsktzr9two
+qgxzqdnzztplvql5
+tkxeight4onexvzfg
+hh4ninelznnln6
+six34bgbbffg
+psgqgrbhsdvhgdxvbdqcxmstnhnqmhchjmbtsdll5qrhlngzzonetwoneg
+2125seven9six
+12four2scvrttnvhsfive7
+nine1fbtf
+twonine4cjqln
+68ninethreeone
+vhcmrbxlttwo2
+xmnbbnlmnk7flhcqrl
+tpjpbnl9gcbhtv
+1z5cjc
+meight65csmkfourpmcv79
+f6four1f
+one95zhnineseven1
+4hmxmkvzmpzb2
+5eight2
+3tmfhdnjtr1b
+6tvpsbbqr92five
+prlhtzthtwo3mjrblrtrsfoneeight4fourtwo
+841jhhfkhppprnine5
+cfkninexcgbqkzsixqpmvptt9
+nv3cccghqhr4
+eight4mgczjmmtqcrd
+two1five
+threecxvdqvrggljgjqn6fourthree
+tdvpx7sevenone41fourfour
+74two24jjsxgvzfqxtwonex
+gvjcdrbntvlphtwosevenfivesix8seven1
+pjhgq7qcvrls
+pplbxsvmqfjjvfhnn3
+1four9four
+eightsevenqnhmkckdzcstkgbcprsg7one
+37bfivehndskks1
+9five1pnmqbldqj5
+dpcvcmkrcgbdhnxrnfourbx88
+3zdqrvffhsnlhseven
+5fourcmpdkjsevenninepksfpdkxpbonethreel
+six9hseven1
+jfive637ffqdnjfjseven76
+3one6
+sixthree5
+7vctcdxsqhqvftqqt61
+fourtwo5xjznnjgeighteightwovss
+one983sevensix7
+pxddhlhzgjqxq8
+5xjkpcrh9
+4cgeightcltbsrjtkjcqrkgjf86jmkh
+smxnvtv8
+jjhxddmg5mqxqbgfivextlcpnvtwothreetwonerzk
+jqlfcmpd4foureightfive
+nine5ninetsfhmclvcb8dsix
+hfbnlvhd76kmxf414pm
+9hgjzbkpd
+8471lqbnine
+zqtwonethreekcz3seven2
+one7eight9gcqmsxdlsqdtqv7
+kjvnsmcctfivetwo7
+8fourthreethree7
+2eightcrq4twotwosixnvdrnkn
+2zhlnthseven8one
+1sixfive6three7shjqz
+five7fourseven
+fivebml9gjvtlfctwo
+cgvvsl44five5ztlfdrc
+7559tfhcdvkthgx
+cnktjkjmcg46fiverxlxkmxvkmnklsfive
+5lvlhsjkxssfour
+sevenfourfour99seven8
+ktgfiveone76ghj
+7zgzsevenftkdfour186|}
+
+let%expect_test _ =
+  puzzle_input |> String.split_lines
+  |> List.map ~f:(fun line ->
+         let n = recover_value line in
+         printf "%s -> %d\n" line n;
+         n)
+  |> List.fold ~init:0 ~f:( + ) |> printf "%d\n";
+  [%expect
+    {|
+    mxmkjvgsdzfhseightonetwoeight7 -> 87
+    3five4s84four9rtbzllggz -> 39
+    75sevenzdrpkv1onetwo -> 72
+    3q7ctkghhqkpb5four -> 34
+    ccxpblrgrjxcgrhjxfmtwonine8eightzzrdn4 -> 24
+    6lqjrhbnxxcqlpnmjsthreesixxsxcgqsxmdx7 -> 67
+    35llbrhh -> 35
+    fivethreejcqpfqmcmvjlmhlbzpxlsmktzkmtmv8p -> 58
+    3369eightnine89 -> 39
+    onesix4qqnlzdsevennmmrcgkndlsgm3 -> 13
+    two4xgdjdqtcjk1threelkjdxvfivesix -> 26
+    sixsix6njhqrnine -> 69
+    4skbhsbtqc -> 44
+    one11fpkjsix -> 16
+    kgtkgdjtwo6mmklqc -> 26
+    kqfqq39gnncltrtpgtwo5bxmx -> 35
+    jdqgmr5jtz -> 55
+    6hltxnninesmfzpnqjnkcrstv -> 69
+    twotwo6eightqcncghjvqfcv5 -> 25
+    4ppzhcvqrnkqonehlhlcqmrq -> 41
+    1xldgvsix67 -> 17
+    2six1bsxxgbonefour -> 24
+    stwone3qlrfive314sixsix -> 26
+    tfkbqvreight34r -> 84
+    five4eight -> 58
+    rvsmznr4eightjqckcr6nine6rhpnmxrhdc -> 46
+    xpqldjttwompcfseven8seven8two -> 22
+    fourclkthghllzlhrs31 -> 41
+    2hpmvfbm8seven5v58 -> 28
+    3qnfqtgndveightthree -> 33
+    fivethreervmhvzgeightvzc63 -> 53
+    hlpsp9nqnsvhdcfourfivestcz -> 95
+    nineninedtfivefive4 -> 94
+    gb9twoseven -> 97
+    1fourfive4seveng -> 17
+    tmlsix2fiveninefourgjltplkfcnine -> 69
+    one3sdrckqtzdzgvtl7vtwo -> 12
+    s2fdklslhzrxktzzttxdtnx1 -> 21
+    three8vhssix9hhtrxkbpjp39mcchnpp -> 39
+    37three5btqxsqkszchfivebvbbddssvc -> 35
+    z5onefour -> 54
+    3eightrthplstr2gbbkddhdqvctlsj -> 32
+    zmtfdb9 -> 99
+    4d -> 44
+    fivetwo9 -> 59
+    sevensevenonefour9fgm -> 79
+    rcqnineseven2 -> 92
+    sevenjssstgtdn47 -> 77
+    34jbdxspph -> 34
+    zthreeeight9sdnzqqhnpvdrmpfq -> 39
+    8nineoneoneoneeight -> 88
+    k3 -> 33
+    sevenfive4sixninesxflqs2 -> 72
+    8hplbktr -> 88
+    sevenfive6nsmqrmflsfxctgjx -> 76
+    954mpcnggqmv -> 94
+    four9four -> 44
+    185qhonezszbfive -> 15
+    oneninetwosix3eightb21 -> 11
+    sixqrhphxsvj15three -> 63
+    43jnvvlsqsvk -> 43
+    oneqxvjlddgfkgjdjgpvcvz5 -> 15
+    lkkgzfbdsjzpslnqseven12ninedxhtjgx -> 79
+    1nine62fivefmxvgr7 -> 17
+    s32eight3seven9nine -> 39
+    eightldxdrtwo1krrnj8vdrchq -> 88
+    gmdm81 -> 81
+    five7two36dzgqninef -> 59
+    2four4461three -> 23
+    fourshbdbvsixklsdgggb6 -> 46
+    bfsfl1 -> 11
+    5bnvzgtbrsngdbqldmzlhk4 -> 54
+    seven1tbjfkmqdpmlkfmqcjl3bzhzfk -> 73
+    22rmsfjstcglnrnninefivesbglz -> 25
+    6sixssg915jthkkfhj -> 65
+    fourseven81945 -> 45
+    4s5two -> 42
+    bzrnthreephhptdvfourjbsteighthkzqbtlczmkjrmh9 -> 39
+    eight5zsbnine3tgllxqjbf8 -> 88
+    2twotwotlgdbnstp7hvgpkgvdkmmzpzf -> 27
+    sixfourr9onelfzvfm4 -> 64
+    lgsmmjmnl713339sdfour -> 74
+    threefive9fivenine7nine -> 39
+    eight68four5threeseven6two -> 82
+    sixeightnfkrzxlvfx5drhptm -> 65
+    3one7jqtpzggzplphrzbnplnfivefour -> 34
+    eightcqksvtdzmsjssnjtf5eight1 -> 81
+    2three4tzzlv -> 24
+    1zfctfccn1fourhnmnklgtwo3nine -> 19
+    ninembcfmxnkqb1four46kgddneightfgxsnkzd -> 98
+    qpjbjmhkclkcznkx1ninefivesix5eight -> 18
+    njhpf5ninefive -> 55
+    7jtwo -> 72
+    two79mvmtbthreesix -> 26
+    threeqcnhzcfk7five8jnk1 -> 31
+    kcdflseven69 -> 79
+    eightninekpjpcbhd4 -> 84
+    3five2ghlgr -> 32
+    615pgtjhqqttsixone8six -> 66
+    nxsqklg3three8 -> 38
+    fourtwo889nzfnqckbpslone -> 41
+    mtzzpfour4pxftwo -> 42
+    phzgbcghsixclrrrfourseven3 -> 63
+    cqpccvmvqnine56mmmtqfp -> 96
+    gdzrsxdhklrlpmkjqzd8 -> 88
+    1fjltwo -> 12
+    fivethree9 -> 59
+    6512krnnxdxzprbtlgcfoneeightwohfl -> 62
+    toneightfive5two -> 12
+    4sixbrcbxq -> 46
+    4hphcpfxppdnhxrmlhfourxfkjb -> 44
+    tdgpntzgz36 -> 36
+    8zhtrnglsix6sixhdlqkfrzvmcztwo4 -> 84
+    xjxph74 -> 74
+    three3qs7sevenpkjone18twonek -> 31
+    fiveseven4 -> 54
+    2eightrlnine8eightrbjpml3nine -> 29
+    fourninethree2three5four4 -> 44
+    rmrvbjblcjpdpvckprzdrdpbdtcmrndhphbbhxpzmtwo53bdxzcn -> 23
+    cvdpnd89four -> 84
+    168five -> 15
+    eightg29tgvfqdzmgstvbtftfour79 -> 89
+    foursevennvmgqvxhvg6seven -> 47
+    6one57onefour6 -> 66
+    one7ninethldxfvthree86dfjxq -> 16
+    bjeightwo7fourfive -> 85
+    jmone3946eightwor -> 12
+    fivexrqhzmsix9four -> 54
+    hldhs2vhtljcqbsseveneight -> 28
+    ninefivenine2fiveb -> 95
+    3hqzninenine -> 39
+    nnpd7seven8 -> 78
+    51mfkr1gjzrcrx6fpsdg7six -> 56
+    zxthreexfzfzckhhggtwo7 -> 37
+    bvmspnxl9mslb8fiveninetwo2seven -> 97
+    nrgmcfgzcthreefivenvvnxzonenine91jsvfkhv -> 31
+    threethree5four -> 34
+    7vclcnxdnmxqc4twobx -> 72
+    22qsthnkclllmlcmthree -> 23
+    1hz2xeightseven3cpbjtpv -> 13
+    65hpvfkkeight2 -> 62
+    eight69 -> 89
+    6sixslschzjxs8rlgjkbqjzhhx2seven -> 67
+    9qdhjctdfzzqv2eightthreexfl -> 93
+    oneqjtbnn68seven -> 17
+    hdzmhfsvch422mcb1one5 -> 45
+    55nine3sevensixfive -> 55
+    lxjrrhkdztwonvmgbbkqxpxgtwo7vdvvzh -> 27
+    kcfctfdpfnseven87ninesixsjkxxn -> 76
+    2twoeighthqllthree -> 23
+    dgjkvnbrh89 -> 89
+    pxmbhhtlmqhdbqkxftk4cx6rljkgx -> 46
+    9seventwoeight65mvmgpfxtrghzd -> 95
+    hd3vhbxgpsevennzhlzseven6 -> 36
+    83one -> 81
+    2kztrbbkj2cmjzm7 -> 27
+    1sdzkctzqtwo -> 12
+    6vxjgvmsz1onepgdkrtrd -> 61
+    52kmspbvqbpzbscjtzkm79onelhzrfmp -> 51
+    1259one4gztcz -> 14
+    jlmrvtxjphtwo2 -> 22
+    zrldjg2two -> 22
+    sixdhsfvqrnseven5ms1 -> 61
+    gmrdkgqb8lmlpzjfflsbkjnntjc9eightcdpdq -> 88
+    4nvxdvgjrnzdtblhxfsvdpvm3seven1tlkhfzmjqp -> 41
+    dxjjbv4lvc39bscvppc91 -> 41
+    c6 -> 66
+    dvftxktvsonehcprkszlbfive1jxckpvknfthxnsm2 -> 12
+    drglpjtm1fivesixccr -> 16
+    five35ksnljjnpdnine -> 59
+    three92 -> 32
+    3hbsgfrxqxgpsbsevencxthree5 -> 35
+    1flnzjsseven2 -> 12
+    176eight6tskbvc -> 16
+    5seventhreesixfivebqtjtwoneff -> 51
+    kghrvxcpgplfdrxxtflbfffivetwo1fourseven -> 57
+    nine1twothreezjrmdcsclgfourtqbstp -> 94
+    ffggc4 -> 44
+    sevendqhkddzpvxsix92jncd -> 72
+    hzgcggpgn867mmvtvd193 -> 83
+    9qkgzfd -> 99
+    sixcrkcrhgpj3497935 -> 65
+    eight4pmknqkklc -> 84
+    sixoneonerxqpfljvleightsix2eight3 -> 63
+    fourfivegznjlplsmpjrbhd61lone -> 41
+    threeseven1one1two8 -> 38
+    986lsixdqkpljbx8 -> 98
+    lggq8fouroneftp5 -> 85
+    loneightfivethreemfn19 -> 19
+    eightseventwo29four -> 84
+    5phtlbfdbltbls99699 -> 59
+    8lnbqbslmqmhkvzvnkmxhllpngcm9one8oneightz -> 88
+    vfqprdmklzgklllm362tcdvvlmvdnjsixeight -> 38
+    2dbltlmcxklxqlvhgmkkgfr -> 22
+    five31468threercbjkvtqgm -> 53
+    ngzpnljmdcrqt86hphtnblsxmg5tnsltm -> 85
+    4mtzpfxrzrrdltjbmgjksix -> 46
+    qztnrrsgkrsskdvj4skfnx6 -> 46
+    571four -> 54
+    1eightxd3 -> 13
+    2four98n366k -> 26
+    sixbbztnkf3fourfourhvs5nine -> 69
+    jsftxsix4ninethreetwok -> 62
+    9mbskphxtmpthree6nine -> 99
+    bm6fourghmnrnsmtwotwofournssrseven -> 67
+    9bnkcmdpsssix48 -> 98
+    fivefourptglzp9 -> 59
+    14gmrfdjmkbjlnine -> 19
+    threetqq3 -> 33
+    two474two4 -> 24
+    tdctzcztgnthreefive1sevenxfqzcjcj -> 37
+    8tph1sevenone9thppone -> 81
+    six3ntvjfgdv6seven -> 67
+    77nine1twobszrsjffqcvhqv -> 72
+    19123threesixone -> 11
+    83sixsixtwoseven6 -> 86
+    cjqnine3btn -> 93
+    gjdlvzct1 -> 11
+    498bvcdrznineonetwo -> 42
+    rmcnshlzxlthmtfjqdn3ktwonem -> 31
+    three9one9ninesevenzpv5 -> 35
+    qtfv1fivefourthreet3one -> 11
+    ldpb7three -> 73
+    fxfrxbhfour9nine25threejkmthznj1 -> 41
+    7three19rffgprxfjzk4 -> 74
+    four91 -> 41
+    mfbfhnh771two9eight -> 78
+    5rhrseven -> 57
+    4three2sevenone -> 41
+    eight58 -> 88
+    eight6one54np -> 84
+    ncc4two9646 -> 46
+    xgboneight4 -> 14
+    7373ngvsgr -> 73
+    foursevendhtgrlrtflxvlonezxxrghjgrzpcmrkdxhtchs9 -> 49
+    mfoursixcneight188 -> 48
+    3xlpkjshjz -> 33
+    sbppcxpnxkjm3fivenrmqzkcdrz9eight9 -> 39
+    eight8threek38eightlfzone -> 81
+    1lpfhddpqsevennine2four -> 14
+    rvnjdqkj6eightsixdxjbt2 -> 62
+    46sixsix -> 46
+    8eighttwocscdgpsz119bdv -> 89
+    1nkmvbcgxs9ninesix68czshseven -> 17
+    sixtfx9 -> 69
+    threetbksevenone1tzmsvspqjhtwotjfdqt -> 32
+    ktztwoseventscssk14 -> 24
+    4z4 -> 44
+    zfd998threekvonebgpxtqxv9 -> 99
+    onesevenone3 -> 13
+    three5fivepzsqvm2 -> 32
+    srvbvkb7one7threejmmlxjvxcnxqggcvtk5 -> 75
+    mvcsix2onegfzzrrqsixeightsevenpmmbmdqvfq -> 67
+    1fsxsnhrpkfh5xcphtfmjdb -> 15
+    91tqmbkxjhg -> 91
+    threefivenfjz1eight5sixseven -> 37
+    5eightfive -> 55
+    4fiveblhqn -> 45
+    23seventhreesevenfour -> 24
+    twofourkqgone2cmtkzldj8 -> 28
+    deightwomqvlxpvthreetwotwof8 -> 88
+    seven7lrrtlsxmpngvstfk9 -> 79
+    threeknchdjnine3k -> 33
+    2fourfourvhnqthfivevbzsfcseven -> 27
+    frfxctwodzjlqcqfj319 -> 29
+    fz7three -> 73
+    mmn8sixtxmgtwothreeprk3eightwoznl -> 82
+    2xjsevenct -> 27
+    551sixkhd -> 56
+    3sevensfck64two -> 32
+    2pmxrtkzrsix26lrtwo -> 22
+    jlqbhmsvmthreefive2tdpjgqgngjjsgmpsix8 -> 38
+    tgtfqplcrsseven1skpfnr8cfrxvn7 -> 77
+    mvpl755three2seventwothree -> 73
+    3b -> 33
+    cdfjmnkjsix2twoeight5gsxsc -> 65
+    3l3gqcmjhtk -> 33
+    9mlftpmmlqctonegpbfstpcnhmm53 -> 93
+    4ninedbztjvvqone5zcnqhh -> 45
+    six5n2tzzhvll2eight -> 68
+    mfcb81phsqmczzsix -> 86
+    cm41oneseven3 -> 43
+    vkkgh2fqs -> 22
+    seven8dhfkghhsix -> 76
+    7jnqxnrvbsg54sixtwonedn -> 71
+    stvsix2leightprsllnlmtjqc6seven -> 67
+    four2threenine4onethree -> 43
+    fiveqqhfivenine9 -> 59
+    four85two8 -> 48
+    5two756twooneightr -> 58
+    679 -> 69
+    xlbbxrhkt4dqdcbkddoneoneightjb -> 48
+    6sixthreethreefdzjcqjgjpxfour5 -> 65
+    deightwosix4six51seven -> 87
+    dkgkgjhc6sevensevenninefivepvbrthreetz -> 63
+    rdqxbbninefvkvdhmgr61nineeight -> 98
+    3nzdvnljf71fiveeight -> 38
+    zcscbkleightvvtxbqbgmr361 -> 81
+    mqhxninebtfrfour9eight8six4 -> 94
+    onezdfdc351 -> 11
+    rrtwonesixtn4eight23 -> 23
+    sevenfivethreezmbjmfiveeight4four -> 74
+    pmfpfjhs58eight -> 58
+    six88tvdsxdll -> 68
+    four8cgm3eight -> 48
+    pprsdrtwokk9seven -> 27
+    sddbkzfczc9 -> 99
+    qsevenone6hc47jbzvpbgj -> 77
+    3hpdmbpmrtrzhkdfivecpdcgqcnfcfiverrhksnpcd -> 35
+    7six946 -> 76
+    nqptzsixsnpqqmjpzmgfheight3 -> 63
+    2fdlprcxtrn -> 22
+    73lnine9 -> 79
+    eight2mrkrqfive -> 85
+    sevenllscmf6sjqbjvdqzd8khxvpninezctzf8 -> 78
+    33xdseven5436 -> 36
+    mnbhzx3threeonetwoone -> 31
+    sixsixtwoxrhfive79 -> 69
+    eightzdbm7sevenzhtl -> 87
+    djlmh9threefour -> 94
+    six7xmlg89 -> 69
+    seven97sixsix4hsgzlm9 -> 79
+    6eightsix2m -> 62
+    tnrzjjxggd9zjckhbrhmvfouronetwo6 -> 96
+    cdhjfvnine82sixonefourdkpsg4 -> 94
+    65vrsvponenine -> 69
+    fivelkpvpone9gjqxf1ninesevenkfrkjqkfb -> 57
+    7twoqst -> 72
+    mggftm2five99four -> 24
+    threeonejjshqfeight3three74 -> 34
+    1h97lfnvdgqlhjmqbqffive -> 15
+    bk88nine -> 89
+    eightone2three7 -> 87
+    3hsvjpfrpv -> 33
+    5sixtwoeightltnvmzsb -> 58
+    3zxqrfkgc -> 33
+    two93njsmdsixsevenfournklz8 -> 28
+    6nlmtheightdjsnklrpbb -> 68
+    3threelpbznvzghpnrveightsixseven -> 37
+    4djqnvrksmdrgfnqglg3two -> 42
+    411vqljd3 -> 43
+    7ninelmbqlthree -> 73
+    two35ninefnhfrsixfive6qzlptcpgh -> 26
+    four1pmkfcpkh8nine -> 49
+    1gzfgmbqbmpqr1tvkrntdn -> 11
+    5sevenseveneightfour4zttvtwolnrkqd -> 52
+    1sfouronepgmckxvhtwo69 -> 19
+    jmbqfour1eightwot -> 42
+    sixonevq5 -> 65
+    r3sixmn -> 36
+    rhklqpztgcvxthreesix5onevf77 -> 37
+    5nnzbzjcpc -> 55
+    twockmmkdpcmhbczbkp2six -> 26
+    95eight57seven -> 97
+    bctwone7one8threexspzds -> 23
+    ninesevenfivevsnxzfxdmf9z995 -> 95
+    7five8gmhlqjvtrqlqgrlngmx4 -> 74
+    gfftcpxeight46 -> 86
+    1nine9two1eight58fxhtmv -> 18
+    1pmpxzsevenjhxpjmxbfourfour -> 14
+    7oneeightpzkzzczg -> 78
+    onenine3threeeightjd9 -> 19
+    fourninecvbmcsctblfour46eightncgkjgt8 -> 48
+    9threesix -> 96
+    sixonesixqdqqjprfourone62 -> 62
+    deightwofourhdb6eight6 -> 86
+    52six4jtlphxslh8 -> 58
+    4tsdjnkqkcrtwo4 -> 44
+    6two5rbggpdz9ninesixjctmfkdhz -> 66
+    xtftfgvkcp1foureight -> 18
+    oneqvdphhjzqmqdb8 -> 18
+    8two8slfvgbqqhq -> 88
+    bnnzlseven41l25sevenb -> 77
+    8smzbc -> 88
+    941eight -> 98
+    vlcszrbhssdhvkcfcnpffhone7four1 -> 11
+    threesix4hcsnpdfqksfour5three -> 33
+    7lcnbkbdfmninenmmrffgbrfour -> 74
+    5hlr8flfldblp4three5twopctglmcq -> 52
+    3sevenfgvgxxsxdvlbkkhr9 -> 39
+    5sfive -> 55
+    8fourtwomqtmchfjbkcgpntjpkkkp -> 82
+    mkjxmqsevennmsspqhzxmrncpstpbfour77jbfz -> 77
+    8nineone1513 -> 83
+    hgsqzrqcbnjcbdtnlfljnm4four -> 44
+    cxqnqseven7gmqpffmxgkxdtwo49 -> 79
+    rndoneightccsjmklbxf8tgqph -> 18
+    twon4 -> 24
+    nsccmbthreebdtjpsixpdc5xbxqqgzf2 -> 32
+    sixglxmmjdvqx9eightntpeightpgzxv7 -> 67
+    pvdtwone8five5tvdlshqnrd884 -> 24
+    fivebfrvnthreecjlzhpglvfphhsix4 -> 54
+    cfnfsf9hrxvpfdvbbfourr949 -> 99
+    3five2psng4 -> 34
+    fourkbbfzlqlvhm3 -> 43
+    zvfqkpzctpreight7threeonehzfxnkj7 -> 87
+    three8one -> 31
+    16eightsevensix32nine -> 19
+    nbgqpspvdtsixjkv6cqzpq -> 66
+    sevenfdfhgrzthree2 -> 72
+    nineqxthree1 -> 91
+    onehmgdksxkninekbbrphbmt6 -> 16
+    5pnrlg7drhdthree925 -> 55
+    two32tqtqk6 -> 26
+    fsknktltdb32seven9 -> 39
+    5464fqtghjrqdpeightvzbx -> 58
+    92five6scnddkj59 -> 99
+    vrmfoneone93four -> 14
+    bbbbzfggtd5qzmnlqxssfour7phfjtjjjtggdmpfgzjssvjbgsr -> 57
+    gncbxjpone22tvfive -> 15
+    6six9eightjjnvnhdxtjfouronefjbsq -> 61
+    tconefsnseveneight47six -> 16
+    hkh4 -> 44
+    3hshtz2seven72one3 -> 33
+    5sevenqqbttbjfdnhlrksthreefive1 -> 51
+    qzcggcmq89qjcglscsp37eightthreepbhdrnbkf -> 83
+    6xjsxlbldc -> 66
+    7s4sevensix6 -> 76
+    5twoeight85threefour -> 54
+    6threekbg7 -> 67
+    3134 -> 34
+    sixtgvxcvfhd1tj -> 61
+    8sevenxzeightrrdvnpf38nine -> 89
+    93three -> 93
+    eight4nfrsjq4eight5 -> 85
+    fournvpfvmqp5 -> 45
+    7fourxvljqmkmshdlczkrhqhmvtwonehn -> 71
+    qlxq1frdbgrvccnn -> 11
+    threesix8ngkjtbtv9 -> 39
+    4r -> 44
+    five8three4ptcnv7 -> 57
+    lnb45xgd -> 45
+    9lbpclmj4gpxrtmvvdeight7 -> 97
+    three9two3threeknrbxpd6dnf -> 36
+    5pqk41sevenmqhvcdpllfour9 -> 59
+    86qlxmrghxlcthreebphtqpdrbj -> 83
+    three6ninevvpfzr24 -> 34
+    eight4zq1vkqdzfjjxqrdxdkgpcp -> 81
+    8hrvgrzcvvchjt8fxgpqngjstpkqmjkmjgdnrvtxmdzzfour -> 84
+    rknoneightcmdbr1 -> 11
+    5vsix6 -> 56
+    ninemttonefour4threevjzmsix -> 96
+    5six5shjhxbplmttbpts -> 55
+    vsevenonefourrlgvfbfsjmbfzxm3 -> 73
+    8141fourvxzgvfxx9qkdkbdoneightrdl -> 88
+    twothree6 -> 26
+    mfpqj6onemtvrnbbgphz -> 61
+    99eightzdnctk -> 98
+    5zrcrsbthreetwoqqrjtzprnvqczxj3 -> 53
+    7sevencgcnjdlnnlfivethreepmnjjjmkqzkvqgf3three -> 73
+    onetjqqcxhksmnb3onefive -> 15
+    2fourthree5foursczlj7fxpfscc7 -> 27
+    qmlf7 -> 77
+    19eight -> 18
+    fivefour2 -> 52
+    onetwofourone3hhffourtwo9 -> 19
+    8threesevenhhtfllrn2 -> 82
+    eight7pcspzljx2msplsg6bdk -> 86
+    eightbknvftrbcsixnine4threemppgcdfzhrxcmlqlq -> 83
+    one46 -> 16
+    3r -> 33
+    5tpvkrxmthreedn4sfseven -> 57
+    48two -> 42
+    s3nkkxzrj -> 33
+    14jfrbrxr -> 14
+    4618 -> 48
+    1nnthreesix -> 16
+    szsmxqcfh1 -> 11
+    ninesevensix4onefbckbkc -> 91
+    ninefour8 -> 98
+    sfxkhrqbndtrrknhchxzqone9three -> 13
+    xxzoneightfivebffhhnk27nn -> 17
+    1threethreeninetwotnbjftcnl -> 12
+    7two58 -> 78
+    22vbljflmgxrdtqgxchsthrstg2l -> 22
+    5lklmmcfkdm12dxsix -> 56
+    threetjsr1 -> 31
+    qcponeight3six9rzvnvbjqzbr8dlhxvfnh -> 18
+    4one84 -> 44
+    six3txbfhvhmkv19 -> 69
+    jnvjqfeight6eighteightfivel -> 85
+    8qshjffmdrrmmtl6one3 -> 83
+    7rxvqgnd3mfivefkrkvmfivenine -> 79
+    8vtxtqg44 -> 84
+    bbhbhkpv7mqzrl58twobkngmjznpmnszmthree -> 73
+    sevengmrtjdgqrpjxlseven36fouroneeight -> 78
+    five758eighteight4 -> 54
+    59kshsonesixfive -> 55
+    lkvtwone1zpkjnbjtjrqppqsksdz -> 21
+    onesbqtbsffgsixeightnineninexchm2 -> 12
+    9eightnqck2tx -> 92
+    zhbpbrxjd9 -> 99
+    659fourhdrxjeightlflseven5 -> 65
+    zjmmvhjbm243oneightgp -> 28
+    3hpfplfkhz9 -> 39
+    6twotwo -> 62
+    sixfourfoursix1tthree -> 63
+    xlfour5133bbhmbq -> 43
+    dhthree5threesix -> 36
+    pdtmsixfourtwo6rl -> 66
+    2three5ftfvfktqvmsixseven8ggjnzhzhm -> 28
+    59four1sczj6jqlsreight -> 58
+    vrrgrhnj1xgmcmd76two2oneightgqp -> 18
+    nine5ljscvrfbdnine4four54 -> 94
+    nine6bfqcdczp16 -> 96
+    3oneighth -> 38
+    bt8three -> 83
+    26jnllqrrxrhpbnkcj -> 26
+    tlcnb88onekcxcchxvzseven95rvsxmsh -> 85
+    bmj53seven9 -> 59
+    one947twosixeight -> 18
+    l1rqhcjqnmj8mhkgkpskeightz -> 18
+    fivepsfcqrgjtkthreez9cvgfhpdclgtwofv3 -> 53
+    3hmd7seven5 -> 35
+    drfftcgdvsixkgzspcftsfour86foureight -> 68
+    rqpvcb4mgdfjcsix1eight -> 48
+    nine3nine -> 99
+    1mgqq3six -> 16
+    5ninerldqnmdh4 -> 54
+    qvkxtthreevddpczxpcv6nine1seven -> 37
+    fivembc1xjzeightone434 -> 54
+    pfhzttgbpzr6two3231eight -> 68
+    1eight11two9onethreeeight -> 18
+    45 -> 45
+    zjrjsgtbfjthreefmkfsclrnjtwo8eight -> 38
+    4sevenxjzt8one -> 41
+    sncdbnbm356 -> 36
+    5nineheight6one -> 51
+    seven4tqthree -> 73
+    mkdhlmffqv9rcbldrzvtgltcone5oneeightpsnxzlprpm -> 98
+    4sixqgflnsfive -> 45
+    hgfphllv3three2two -> 32
+    tvtkg476 -> 46
+    knnkjxs1cgxoneseven91 -> 11
+    thzxgnnz27eightsixthreetwofour -> 24
+    tfzptldgnsfive3bqblfdnine -> 59
+    9tfscsfj33 -> 93
+    zhkfstzlddqbdks6fournine -> 69
+    hvvjjfournine8six4 -> 44
+    vhq9jsllg862rrrrxfhkn -> 92
+    7oneseveneightq5xfmtsix -> 76
+    3three7979 -> 39
+    9dcvdgkmthpzktwofour -> 94
+    nvvfivezxcgdbxslfshcshbvvkklp9 -> 59
+    qcfqfckd3bcbvmg4b -> 34
+    gttwonerchfrxhvsixljqxmhrpjb6ninesixonenine -> 29
+    zfbfgvkx6 -> 66
+    cctfqjseventxjnmjltwo9sixeight -> 78
+    eightjq9 -> 89
+    sevenflj7four -> 74
+    65three8trqptndveightfour -> 64
+    46fkbhhqzgthree7nine43xfxptdxp -> 43
+    moneightfourcqdvm5sixnine1 -> 11
+    gsbthree7 -> 37
+    tqdlh7seven -> 77
+    4seven4sixprjslbrvbsix -> 46
+    eightsixsix8pqchtpttrq7threenine8 -> 88
+    fivehcthreetwoseven4hllhvmleighteight -> 58
+    five79gmsvqvfour -> 54
+    fiveninej7seven -> 57
+    sixglnrtwoxvvc45 -> 65
+    fivetzkdhmbzbvxndxjhljgbd2 -> 52
+    nineeightllpslcxbdvvmrtwo4 -> 94
+    twoshzhlngsixnhftqp9twothree -> 23
+    5rkdc9eightseven62three -> 53
+    knrpvflpzjsix3jmftfqmqtlgjnltkfm -> 63
+    three62fnrtckmnkcvplvtb3k3 -> 33
+    xtbsm8six2six6 -> 86
+    four5sixfivetqeightwozt -> 42
+    7qxhbpvknqb5sevenkhpphnpfhsix -> 76
+    29kxbznzxtwo8 -> 28
+    1sixrmfxcfive9 -> 19
+    fourjzmnxfprpbznz32six2 -> 42
+    two5six1nlrtqrcxm -> 21
+    69eightone18 -> 68
+    fourthreev29sixthreeone -> 41
+    ninekpjbjm7683 -> 93
+    2ccnpk -> 22
+    3three3f -> 33
+    7fourthreenine -> 79
+    3seven5onefive -> 35
+    nfsssvfzfive9seveneightfour5sevenpstctrnkmj -> 57
+    2nlkgsix27c -> 27
+    lsr1 -> 11
+    vzlbfiveninetwovdrncmmnf3five -> 55
+    fblnvgx4sqspkgdkgninefhqrxnmgfourseven7 -> 47
+    z5fourcbnbkjzz99eightdbkmrcdhbcsix -> 56
+    jgvhjddq6vccsbrnonedvsjkrnbeight -> 68
+    85four7mfqnt8three -> 83
+    sevenfive95ktghsd -> 75
+    5ngr34kxqnmdvk -> 54
+    fourcdr469jvjd2onedqvjqjftz -> 41
+    8vkmsseven82 -> 82
+    pksixseven9vthrzfouroneightlvr -> 68
+    87rdnzmgpnvflnqsbvkjq -> 87
+    sixxtnponejkmvmn6 -> 66
+    gz5q9eight462nine -> 59
+    gsixthreehvktsix82 -> 62
+    455mcqgnj -> 45
+    five9zzthqcgvfive5ninepvzxxonecshsghbmpj -> 51
+    9five7four -> 94
+    one1sevenhmddjlninesevenfour -> 14
+    xnhbmdlvgj82fivedvz -> 85
+    52dnxsseven7rszgdxlhgj -> 57
+    threeseven34two -> 32
+    97hsrpcxz2shp8one -> 91
+    7twofour2jthnzc8 -> 78
+    cveight55eight -> 88
+    six1lglhzsnkdfivedpnlgcjtldtqmd -> 65
+    tsqmjxmhxncdpr1jmxmgx2fivelvjltzvhjhone -> 11
+    mrxtmfmrh3seventhree -> 33
+    fourtwohk7 -> 47
+    9eighth95pkp -> 95
+    289fcqzqhlzsfqrg -> 29
+    tfkqtzhrbvllmvvzggjlzzp28mhpfztxpqsthree -> 23
+    5eightsv349two -> 52
+    98five4five -> 95
+    fivesixthreejfivepbhdlvnkb6 -> 56
+    onefivedfgkdr8one -> 11
+    236five5sfmjdfive -> 25
+    sevenqg5 -> 75
+    two4eighthtvcxhxone -> 21
+    99fivecnsnflqp9six -> 96
+    fivefourdfjjpv85fourkcttlqdpksxqjzgbgk -> 54
+    four7cp1 -> 41
+    zpgd2px -> 22
+    tltlzcf3djmzqjr9five -> 35
+    2twoninezrfivecttvkjfmmlrckhnrb -> 25
+    onetwo1sevenddddpklfourdlvsixone -> 11
+    18924 -> 14
+    8m -> 88
+    1bblbkt4sixeight -> 18
+    3xfsthreeonepjjprmvlt -> 31
+    four8eightptvtcfour -> 44
+    eightsrfflfxbpvtlbzsdv7two -> 82
+    fiveninefive5xllzgscseveng -> 57
+    1eightfivedmvdgzfqjrqnhtsh2eight -> 18
+    6six8vqfrpkfmkq7pbjrl8d -> 68
+    6threelbldnpx -> 63
+    9four78one1four -> 94
+    vfivesix6 -> 56
+    2twonemg -> 21
+    sixzsxfsgqonesix7tvhplmf -> 67
+    threesix56five4 -> 34
+    dt78seven4vzlrzb9 -> 79
+    seven61pfvdnlcq13threenine -> 79
+    pzvdtfeightsix2four -> 84
+    six632sevenfivenhmhknkflkjrcfrts -> 65
+    three4seventhreenqpjmrr -> 33
+    two3jhjvjqlmls7eight5sevencrzbtxqp -> 27
+    7jdlgznine -> 79
+    lg2hfteight3 -> 23
+    8cttggeightsix54czlc2nine -> 89
+    hc3dkrvqf -> 33
+    eightks65ninesix -> 86
+    gttmtsl247 -> 27
+    9eightxnjjf4jbrdbtwoctwomllpfvx -> 92
+    5ninettpkf -> 59
+    hvbhhn7knbfk9rfsxrgmfqfzc473 -> 73
+    xpvmvtplxdm9jjhzmpgcddfour7 -> 97
+    3pnzsbbcb3fivecsqhllpkslfqsdv -> 35
+    sdlseven4six1eight3 -> 73
+    3hfssp1nine4ldtjhsix -> 36
+    twofour1mqkkvczdbr8five88eightwox -> 22
+    5fiveone2nine8 -> 58
+    8xvkdtbbdqlmtp6 -> 86
+    9hsksxfnr4lzs7bkhfsh4 -> 94
+    nineseven876ninejl -> 99
+    6b7eight -> 68
+    jmvpfjsjvjtwo78bmhnxg -> 28
+    4vgrzfsptpx6rdrnpbsmckvrglrlfive -> 45
+    threecrvzssmsnfourfive9jvtcqxbppfs -> 39
+    three18lbjdvqp -> 38
+    cntz6xp2 -> 62
+    ttwonejhmjctlz374seven18three8 -> 28
+    56sqh1fvfshgmxxl1 -> 51
+    qsbrnj1 -> 11
+    nine1nine61onethree -> 93
+    4fourbnz5 -> 45
+    8one8 -> 88
+    six9k -> 69
+    xj74four2xhxq2 -> 72
+    9sxvspcxrzgfourfiveseven9 -> 99
+    ninermnfknxbtwoonejds9 -> 99
+    five4hpr -> 54
+    pztthbxhfour8xrmvpgeightslhbngshrs8 -> 48
+    41sixsix8five -> 45
+    fourcrvxprsjlgglczq7rnmbtwopktrzthree -> 43
+    fivebdmqrtwop1 -> 51
+    sixnineninehfqmpzzc9 -> 69
+    8sptsqhpzxfccpfivenskklrsmcftwokhlqklznone -> 81
+    22ttpfbqfnckkdqmptlfdseven -> 27
+    9onefive2cnjlsd7 -> 97
+    ftsfmbskf37onetmnzgjpcqsrt5bjdeightwosgm -> 32
+    sevenjseven5rnseven6lsgdr3 -> 73
+    twoeightxdghlhhsjq65oneightz -> 28
+    rxnfndqlq6 -> 66
+    7rfvztgnh -> 77
+    zjmklxvsvzlfgpgrtjpdninefivenine9eight -> 98
+    six3cktxsix1vnbdlfc -> 61
+    sevenninencdninefour7 -> 77
+    6826 -> 66
+    22eight -> 28
+    88vsdcvlkniners41qlfive -> 85
+    seven9eightrxhsndgj1vq88five -> 75
+    jvpbvsevenfivesix285foureight -> 78
+    8seven4 -> 84
+    rslvvsixeightlpchthninem6 -> 66
+    bmfkmthree5kqndvprvfive -> 35
+    8r7hpxrzzxgmcsbnrnhr93 -> 83
+    692 -> 62
+    1zlpvhnfdbtg -> 11
+    7fivefiveone -> 71
+    xkfd2eightsevenfourtwonegr -> 21
+    9fivesixtwo -> 92
+    rschzfcgrtwotckrdhdtv6mtwo -> 22
+    6tdxlh -> 66
+    twofivej2srhpxhj -> 22
+    58scmtvn3mndnjnbqmsthree5sevenfour -> 54
+    sixmclmtrlone8bgbtg -> 68
+    jzrhmgvllh4nxphfssd73 -> 43
+    mbsevenfzbtjqjb5mlgmq -> 75
+    sz73ghmbqvlhgffdkrrk -> 73
+    vlkgfhcsqklnkqdmdeight5jfivekvnjlbeightkcfrcgc -> 88
+    pn3spmgcseighttwohzgmctfour -> 34
+    5four6nhvkvlbjfour1kmnxskdpd -> 51
+    865 -> 85
+    twoqknkgggtwoqrvxgvdz83eightghmnphhcsb -> 28
+    ninefiveeightfq9bszrhqztl7one -> 91
+    fourbrj2 -> 42
+    lnqnnqbnonenv66 -> 16
+    4xgmjzpbptnine1 -> 41
+    gnvnnfourccfshvbninek8ninekcnhcxkk -> 49
+    47krxlf -> 47
+    thsix6jzxxqls2kgxdflrdtxzsix -> 66
+    4bjdfgxmsjrfivepkpvklmdthreeone5 -> 45
+    hxktj8 -> 88
+    rntwone5 -> 25
+    one77n -> 17
+    rpcqn5 -> 55
+    zonecvvzpltlkvq19 -> 19
+    rcnxqvqzj9nineeight59trdfxbr -> 99
+    8eightthreeone -> 81
+    jbksthreetworszgrht7 -> 37
+    xvk4zfbclkpbeight -> 48
+    2nineninesixsixfive5 -> 25
+    3seven5 -> 35
+    1jjmffhtxskjmgc6vhvjk -> 16
+    4six1 -> 41
+    one6five94 -> 14
+    rfqtbxltrhrcnpf7lbd6 -> 76
+    56fiveninenqpfrv -> 59
+    3eightsix823eightonesix -> 36
+    threegntdfqltbncn92 -> 32
+    g9eightkbpdqqqbz -> 98
+    79sevensjsvgbbnjeight -> 78
+    6sevensixvth23two6 -> 66
+    gxc5bgqtbgknfourcbjeightone3 -> 53
+    five7two -> 52
+    3nsjnxsjqqqszc4 -> 34
+    8bnxdbqtpggfhkvbqbjkggkqgvrjntxf3mrvmptgptcftspk -> 83
+    sixlfsvljpjmdsplnjffmsevendll3 -> 63
+    btjkmdsscd566nine -> 59
+    8zdbhzj -> 88
+    rrkshvnsixknbxdfjhq4nineeightvkhqnr -> 68
+    xpfqfthreesixseven1 -> 31
+    tbvgsqcjtctdpvm36 -> 36
+    onenine1rdxxcjgkp -> 11
+    two1phslfour4cb -> 24
+    63tvv -> 63
+    eightfivehtzgmggpxjsevenmsix3 -> 83
+    782eighthgzfdnxqcvngd -> 78
+    nine8zkqrcv -> 98
+    pjmgbhsbq367six -> 36
+    9rlmcphtvr -> 99
+    three5ktjhxhhdsv75 -> 35
+    hkqbbdgrvbone7q7three1 -> 11
+    6sevenfxf -> 67
+    one8fvmnz -> 18
+    three1pmlrhnbg38xj14 -> 34
+    seven51seven9bfxzkzvjeight -> 78
+    tworjvtdpdvhztwo6zbbcmrszhthree -> 23
+    zhbxpkhvvdf9nrlvxsqhpvdtbvxhqseven -> 97
+    five56three3 -> 53
+    qrpgpblxrfpjhtq4onepzx -> 41
+    lqzmkbhrthreesrdtbgpfmg7 -> 37
+    2sthreeninektktttfive -> 25
+    32five1four -> 34
+    hvsh71 -> 71
+    qvvtbg35hvnsevenxzslzvjjdpcfh5three -> 33
+    ninesevenmcxthmqffv6vrctchjvnv2 -> 92
+    5eight5l -> 55
+    nineznnghfhjgqgclsv69s -> 99
+    3tpxxcqtn -> 33
+    voneightmzxd16h -> 16
+    1sevenfour39 -> 19
+    onevftpfhpttn8zbsonefourkjgvxbtkf -> 14
+    five4qjgsjrt -> 54
+    8nsxz9 -> 89
+    four7twosixsixthreefourfour -> 44
+    4fourtqbdskvvn -> 44
+    nine9onehgdtgfzr -> 91
+    3fiveeightseven -> 37
+    four92nine6xsptzhlvsdxg -> 46
+    5two78kmrbn923 -> 53
+    6zkjtprddlxppbrndhcpxgsscnineeight6 -> 66
+    tsmeightwo961eightoneonejpcmsxpstwo -> 82
+    3three45mfslth5fourrj -> 34
+    xjqxninelqvlcrfvqtndsevenfive9fourvdlhpt -> 94
+    three2kmkmcv9onethchqfgtjtqzr -> 31
+    ffive5x -> 55
+    613mm25four -> 64
+    ninehdqhjd4two61eightfive -> 95
+    kbnmjnfqkone65one3dfxtlseventhree -> 13
+    twoeightsixsixjv1fourthreetwo -> 22
+    1vgcbgsevengrzc -> 17
+    8threensspvzxvtwosmskq2 -> 82
+    mmqvhlhksm5threeqhdgcls65 -> 55
+    c4dllhmcq8pv -> 48
+    4fivenine775 -> 45
+    1sevenfivepfqzsnz -> 15
+    3xrfivetwo6kthreesixpdfgjbsk -> 36
+    onethreetzffmzdq24 -> 14
+    eight4seven6rnqznchsevenseven -> 87
+    hsklxtnzlcpknhsevenjjxvkzxvm79five -> 75
+    7bvnnlxpx1six -> 76
+    pgqkcpzx9ltrdvcv -> 99
+    8twormcqrdbxnhhhh6 -> 86
+    7lkhmssvbktwoseven -> 77
+    three7one7sixpntkrttkm -> 36
+    zbscnhfpqplrzsghjxbjcpjqbgfive9ninesseven -> 57
+    4fivemxpsvsrone1lmmxqqvkmvprxbtt -> 41
+    7sevensixtwofouronefivenqdcrprsk -> 75
+    81twotjkhqzdjs9sgzqbbgf2 -> 82
+    snfgfqchtfk34fivexnjfqqv -> 35
+    ksjrvrbr6two -> 62
+    kdvbgptwo4twohqshpjqdnseven8five -> 25
+    fhdnbzvmsrrndqtcstgtwo3f1dbmt6six -> 26
+    126 -> 16
+    kdbdgkgkzhbzdgseven524seven -> 77
+    bqllslqqfrdtvone9ninezbcxpzgzkdzcx -> 19
+    4ninefourthreeninengshmnfhvf5 -> 45
+    four55cbrhbcpscnnjqxs -> 45
+    rh7mqbvlfjjnhhlqgqpdffnj6 -> 76
+    93onenine -> 99
+    hklqshsc7eight4hbbrzqbmvfourkqlsmknine -> 79
+    sevenblqqsd63five2eight -> 78
+    threenine1kncghvqmgt -> 31
+    sixfht5psfxvt -> 65
+    one4cmxfiveseven -> 17
+    94ssfour6twojrvscgqzlrnzrbnvrdxtxtzn -> 92
+    gqfpxxslmkbjsl8threetwojdv -> 82
+    9lcvgsl -> 99
+    1nine6sevensix29qjpsix -> 16
+    9seven7lfsbtnzcbmlq3zqcfmckb -> 93
+    6v1nbsstmrzkseven4vfjfmtktpc -> 64
+    7vdnhzgrdgkqmmhcnmjtfive7dnfhmjxndbsnm -> 77
+    fkczmxzshtsevenszcfbsljzsqcplc124 -> 74
+    eightone582 -> 82
+    1gccxfjhgbc37fourxzdr9n4 -> 14
+    rczkvvonepph1nine833 -> 13
+    1hpbvtk -> 11
+    onep3nmmdmtrmj29 -> 19
+    txmlgzjtrddxl1nine29vcjnxjbqeight -> 18
+    2sixktlcqbngvgeighttwofive6vsmzlmfb5 -> 25
+    zlkrfour89threerhnlnd1 -> 41
+    xnbznine43dcvpplpqzv4threeonefive -> 95
+    fiveoneckrmlzmpn98two -> 52
+    dgcsix74sevenmflkcrtpb -> 67
+    fldxlgcqxbv8btdkmrdhsevenrbmzkgkznbninenine -> 89
+    qvxspxxmr9bsjeight -> 98
+    622chmv7sqztsssvp3 -> 63
+    8cxspjfnxtrgvpeightnine -> 89
+    qsninetwo8dpd9five -> 95
+    zzlbgqoneseveneight15 -> 15
+    fourtwo6qqrjqvhbvbdlsggckb8 -> 48
+    4sixmfkdcbjzv46 -> 46
+    tcxt5twoq -> 52
+    9jzvkxfourzjxxbbqmlmfs -> 94
+    1fpxhpjsgfnine6 -> 16
+    1ntnmbj5pz -> 15
+    five81hhxsnhfourninevnine -> 59
+    jpmjrdjrrm7three1 -> 71
+    one6fhblldjnbnlzjhhpkdjfkr72threetwo -> 12
+    6fiveeight7jb7lqkghcmrhvhj -> 67
+    eight8czbc689 -> 89
+    qqmqspdtwo4ntbkmbbvkqpfzrksgcktlznj -> 24
+    ninefiveseven88618 -> 98
+    qjxcchckrmtwoone326 -> 26
+    1gjcklxrnbtmfqnvlnkfgz13kkptcjqndr9nine -> 19
+    hchgvsbfour7fourlgjkcrthreeninekvvqhzrleight -> 48
+    nmgdxt1 -> 11
+    seven5four6667threeeight -> 78
+    one2kcsddzkl3 -> 13
+    nzdtjvxj739tbdvc7 -> 77
+    oneone5three -> 13
+    onefourxqxkjq5 -> 15
+    23bljlvpltnbcxmmgslrhksjdlbzhddrfourseventhree -> 23
+    3five68vpxkmrb -> 38
+    7crfeight -> 78
+    1ktvdhsmxq -> 11
+    6pkr7seven -> 67
+    sixpmrpqtndhxxjheight88fiveqzgsftgfvhbnjdjtktp -> 65
+    73two2eight4three57 -> 77
+    5foursix79625 -> 55
+    43fourtwo13mmctvsrljtvd -> 43
+    5ddrjxjhfhjbdgmmgsqzpnlt5lfktpkbthncvjntnns -> 55
+    threeqnpknxvnfthreeqdmfour1tq -> 31
+    8rqdkzdjvpngdhzr6kqpcreightn -> 88
+    zrmtrpl13foursevenonejmvthree -> 13
+    zghbcdcrdqjtqgvnine2sevensix3nhqk -> 93
+    xmtxjmllhsbn1mtxvvrjftwo -> 12
+    78btvheight -> 78
+    four5seven68pzllptfqmxh2 -> 42
+    onesevenlbsp6eightsixtwoninelpfl -> 19
+    fhnttk3sixnfqvhdqhnfgpglpbpltfqjvkkmz -> 36
+    69three76 -> 66
+    pxkh55 -> 55
+    vtqfklninemxgnzspgl8 -> 98
+    53three7 -> 57
+    fiveeighthfive89fivexdbpthree -> 53
+    5lcvlpgxjmsqzbffcvpxrhtvbbcp -> 55
+    lfnine89sevenone9 -> 99
+    8lsthlhtbpfour -> 84
+    1twofour7b -> 17
+    3ncrzdmzsqfbvgjpx -> 33
+    fivenhcvbntlcfthreemsktzr9two -> 52
+    qgxzqdnzztplvql5 -> 55
+    tkxeight4onexvzfg -> 81
+    hh4ninelznnln6 -> 46
+    six34bgbbffg -> 64
+    psgqgrbhsdvhgdxvbdqcxmstnhnqmhchjmbtsdll5qrhlngzzonetwoneg -> 51
+    2125seven9six -> 26
+    12four2scvrttnvhsfive7 -> 17
+    nine1fbtf -> 91
+    twonine4cjqln -> 24
+    68ninethreeone -> 61
+    vhcmrbxlttwo2 -> 22
+    xmnbbnlmnk7flhcqrl -> 77
+    tpjpbnl9gcbhtv -> 99
+    1z5cjc -> 15
+    meight65csmkfourpmcv79 -> 89
+    f6four1f -> 61
+    one95zhnineseven1 -> 11
+    4hmxmkvzmpzb2 -> 42
+    5eight2 -> 52
+    3tmfhdnjtr1b -> 31
+    6tvpsbbqr92five -> 65
+    prlhtzthtwo3mjrblrtrsfoneeight4fourtwo -> 22
+    841jhhfkhppprnine5 -> 85
+    cfkninexcgbqkzsixqpmvptt9 -> 99
+    nv3cccghqhr4 -> 34
+    eight4mgczjmmtqcrd -> 84
+    two1five -> 25
+    threecxvdqvrggljgjqn6fourthree -> 33
+    tdvpx7sevenone41fourfour -> 74
+    74two24jjsxgvzfqxtwonex -> 71
+    gvjcdrbntvlphtwosevenfivesix8seven1 -> 21
+    pjhgq7qcvrls -> 77
+    pplbxsvmqfjjvfhnn3 -> 33
+    1four9four -> 14
+    eightsevenqnhmkckdzcstkgbcprsg7one -> 81
+    37bfivehndskks1 -> 31
+    9five1pnmqbldqj5 -> 95
+    dpcvcmkrcgbdhnxrnfourbx88 -> 48
+    3zdqrvffhsnlhseven -> 37
+    5fourcmpdkjsevenninepksfpdkxpbonethreel -> 53
+    six9hseven1 -> 61
+    jfive637ffqdnjfjseven76 -> 56
+    3one6 -> 36
+    sixthree5 -> 65
+    7vctcdxsqhqvftqqt61 -> 71
+    fourtwo5xjznnjgeighteightwovss -> 42
+    one983sevensix7 -> 17
+    pxddhlhzgjqxq8 -> 88
+    5xjkpcrh9 -> 59
+    4cgeightcltbsrjtkjcqrkgjf86jmkh -> 46
+    smxnvtv8 -> 88
+    jjhxddmg5mqxqbgfivextlcpnvtwothreetwonerzk -> 51
+    jqlfcmpd4foureightfive -> 45
+    nine5ninetsfhmclvcb8dsix -> 96
+    hfbnlvhd76kmxf414pm -> 74
+    9hgjzbkpd -> 99
+    8471lqbnine -> 89
+    zqtwonethreekcz3seven2 -> 22
+    one7eight9gcqmsxdlsqdtqv7 -> 17
+    kjvnsmcctfivetwo7 -> 57
+    8fourthreethree7 -> 87
+    2eightcrq4twotwosixnvdrnkn -> 26
+    2zhlnthseven8one -> 21
+    1sixfive6three7shjqz -> 17
+    five7fourseven -> 57
+    fivebml9gjvtlfctwo -> 52
+    cgvvsl44five5ztlfdrc -> 45
+    7559tfhcdvkthgx -> 79
+    cnktjkjmcg46fiverxlxkmxvkmnklsfive -> 45
+    5lvlhsjkxssfour -> 54
+    sevenfourfour99seven8 -> 78
+    ktgfiveone76ghj -> 56
+    7zgzsevenftkdfour186 -> 76
+    53592 |}]
