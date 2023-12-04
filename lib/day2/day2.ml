@@ -29,7 +29,12 @@ In the example above, games 1, 2, and 5 would have been possible if the bag had 
 Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
 *)
 
-type color = Red | Green | Blue [@@deriving sexp, compare, equal, hash]
+type color =
+  | Red
+  | Green
+  | Blue
+[@@deriving sexp, compare, equal, hash]
+
 type hand = color -> int
 
 let sexp_of_hand (h : hand) : Sexp.t =
@@ -37,7 +42,11 @@ let sexp_of_hand (h : hand) : Sexp.t =
   |> List.filter ~f:(fun (_, n) -> n <> 0)
   |> [%sexp_of: (color * int) list]
 
-type game = { id : int; hands : hand list } [@@deriving sexp_of]
+type game = {
+  id : int;
+  hands : hand list;
+}
+[@@deriving sexp_of]
 
 let empty_hand : hand = fun _ -> 0
 

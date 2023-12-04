@@ -44,7 +44,10 @@ let example_engine_schematic =
 ...$.*....
 .664.598..|}
 
-type value = { value : int; min_x : int }
+type value = {
+  value : int;
+  min_x : int;
+}
 
 let is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol : bool =
   let exception IsAdjacent in
