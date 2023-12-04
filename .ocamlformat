@@ -2,6 +2,7 @@ profile = conventional
 version = 0.26.1
 
 indicate-multiline-delimiters = closing-on-separate-line
+break-cases = toplevel
 break-infix-before-func = true
 break-infix = fit-or-vertical
 exp-grouping = preserve
@@ -10,7 +11,5 @@ nested-match = align
 parens-tuple = multi-line-only
 space-around-arrays = false
 space-around-lists = false
-space-around-records = false
 space-around-variants = false
-break-cases = toplevel
 function-indent = 0

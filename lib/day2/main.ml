@@ -37,7 +37,7 @@ let sexp_of_hand (h : hand) : Sexp.t =
   |> List.filter ~f:(fun (_, n) -> n <> 0)
   |> [%sexp_of: (color * int) list]
 
-type game = {id : int; hands : hand list} [@@deriving sexp_of]
+type game = { id : int; hands : hand list } [@@deriving sexp_of]
 
 let empty_hand : hand = fun _ -> 0
 
@@ -91,7 +91,7 @@ let parse_game_exn (game_record : string) : game =
   | [header; hands] ->
     let id = parse_game_header_exn header in
     let hands = String.split hands ~on:';' |> List.map ~f:parse_hand_exn in
-    {id; hands}
+    { id; hands }
   | _ -> Printf.sprintf "invalid game_record: \"%s\"" game_record |> failwith
 
 let parse_games_record_exn (games_record : string) : game list =
@@ -170,7 +170,7 @@ let solve ~(record : string) ~(max_hand : hand) : int =
   record
   |> parse_games_record_exn
   |> List.filter ~f:(is_legal_game ~max_hand)
-  |> List.map ~f:(fun {id; _} -> id)
+  |> List.map ~f:(fun { id; _ } -> id)
   |> List.fold ~init:0 ~f:( + )
 
 let%test_unit _ =
@@ -306,7 +306,7 @@ The power of a set of cubes is equal to the numbers of red, green, and blue cube
 For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?   
 *)
 
-let get_min_hand {hands; _} : hand =
+let get_min_hand { hands; _ } : hand =
  fun c ->
   List.map hands ~f:(fun h -> h c)
   |> List.max_elt ~compare:Int.compare

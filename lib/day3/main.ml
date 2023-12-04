@@ -44,7 +44,7 @@ let example_engine_schematic =
 ...$.*....
 .664.598..|}
 
-type value = {value : int; min_x : int}
+type value = { value : int; min_x : int }
 
 let is_adjacent_to_symbol ~n ~m ~min_x ~max_x ~y ~is_symbol : bool =
   let exception IsAdjacent in
@@ -86,16 +86,16 @@ let process (schematic : string) =
         String.foldi line ~init:None ~f:(fun x num char ->
             match num, Int.of_string_opt (String.of_char char) with
             | Some num, Some next_digit ->
-              Some {num with value = (num.value * 10) + next_digit}
-            | Some {value; min_x}, None ->
+              Some { num with value = (num.value * 10) + next_digit }
+            | Some { value; min_x }, None ->
               add_num value ~min_x ~max_x:(x - 1) ~y;
               None
-            | None, Some value -> Some {value; min_x = x}
+            | None, Some value -> Some { value; min_x = x }
             | None, None -> None
         )
         |> function
         | None -> ()
-        | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+        | Some { value; min_x } -> add_num value ~min_x ~max_x:m ~y
     );
     !sum
 
@@ -1509,16 +1509,16 @@ let process (schematic : string) =
       String.foldi line ~init:None ~f:(fun x num char ->
           match num, Int.of_string_opt (String.of_char char) with
           | Some num, Some next_digit ->
-            Some {num with value = (num.value * 10) + next_digit}
-          | Some {value; min_x}, None ->
+            Some { num with value = (num.value * 10) + next_digit }
+          | Some { value; min_x }, None ->
             add_num value ~min_x ~max_x:(x - 1) ~y;
             None
-          | None, Some value -> Some {value; min_x = x}
+          | None, Some value -> Some { value; min_x = x }
           | None, None -> None
       )
       |> function
       | None -> ()
-      | Some {value; min_x} -> add_num value ~min_x ~max_x:m ~y
+      | Some { value; min_x } -> add_num value ~min_x ~max_x:m ~y
   );
   Array.fold gear_nums_mat ~init:0 ~f:(fun init gear_nums_row ->
       Array.fold gear_nums_row ~init ~f:(fun init gear_nums ->
