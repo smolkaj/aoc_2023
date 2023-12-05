@@ -4,13 +4,12 @@ https://adventofcode.com/2023
 
 # Dev workflow
 
-To continously build and test the library for a given day, say `lib/day2/*`,
-execute the following command:
-```
-dune runtest -w --auto-promote lib/day2
-```
-or just
+Simply run
 ```
 dune runtest -w --auto-promote
 ```
-to do the same for all days
+to continuously build and test the code for all days, or
+```
+dune runtest -w --auto-promote lib/day2
+```
+to do the same for a single day, e.g. `day2`, only.
