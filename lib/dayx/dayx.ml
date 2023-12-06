@@ -11,7 +11,13 @@ let tap x ~f =
 
 *)
 module Part1 = struct
-  let solve input = input
+  let parse input = input
+
+  let%expect_test _ =
+    Inputs.example_input |> parse |> printf "%s\n";
+    [%expect {| |}]
+
+  let solve input = input |> parse
 
   let%expect_test _ =
     Inputs.example_input |> solve |> printf "%s\n";
@@ -27,7 +33,13 @@ end
 
 *)
 module Part2 = struct
-  let solve input = input
+  let parse input = input
+
+  let%expect_test _ =
+    Inputs.example_input |> parse |> printf "%s\n";
+    [%expect {| |}]
+
+  let solve input = input |> parse
 
   let%expect_test _ =
     Inputs.example_input |> solve |> printf "%s\n";
